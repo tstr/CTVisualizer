@@ -24,6 +24,8 @@ find_package(Qt5 COMPONENTS Widgets REQUIRED)
 #
 set(sources
 	src/Main.cpp
+	src/MainWindow.h
+	src/MainWindow.cpp
 )
 
 add_executable(Application WIN32
@@ -37,7 +39,7 @@ target_link_libraries(Application
 
 # Set up IDE source folders
 file(TO_NATIVE_PATH "${sources}" sources)
-source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}/src" PREFIX src FILES ${sources})
+source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}" FILES ${sources})
 
 ############################################################################################
 

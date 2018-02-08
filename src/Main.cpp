@@ -1,13 +1,14 @@
 
 #include <QApplication>
-#include <QMessageBox>
+#include "MainWindow.h"
+#include <QtWidgets>
 
 int main(int argc, char* argv[])
 {
 	QApplication app(argc, argv);
 
-	QMessageBox box(QMessageBox::Information, "title", "hello world");
-	box.show();
+	MainWindow window;
+	window.show();
 
 	return app.exec();
 }
