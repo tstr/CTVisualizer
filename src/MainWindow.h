@@ -21,7 +21,12 @@ public:
 
 private slots:
 
-	void sliderChanged(int value);
+	/*
+		Update image views
+	*/
+	void setImageFront(int value);
+	void setImageSide(int value);
+	void setImageTop(int value);
 
 private:
 
@@ -29,14 +34,17 @@ private:
 	QWidget* createControlArea();
 	QWidget* createImageArea();
 
+	//Volume data
 	Volume m_volume;
 
-	QPixmap m_img;
+	//front-back view
+	QSlider* m_zSlider;
+	//top-down view
+	QSlider* m_ySlider;
+	//top-down view
+	QSlider* m_xSlider;
 
-	QSlider* m_zSlider; //front-back view
-	QSlider* m_ySlider; //top-down view
-	QSlider* m_xSlider; //top-down view
-
+	//Image view widgets
 	QLabel* m_topImage;
 	QLabel* m_sideImage;
 	QLabel* m_frontImage;

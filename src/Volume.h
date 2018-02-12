@@ -11,9 +11,6 @@
 	 |
 	 |________x
 	z
-	 ___ ___ ___ ___
-	|   |   |   |   |
-	|___|___|___|___|
 */
 
 #pragma once
@@ -25,7 +22,8 @@ class Volume
 {
 public:
 
-	using VoxelType = ushort;
+	using VoxelType = quint16;
+	using EqualizedVoxelType = quint8;
 
 	//Trivially constructable
 	Volume() {}
@@ -39,9 +37,9 @@ public:
 	/*
 		Get dimensions of volume
 	*/
-	size_t getColumns() const { return m_columns; }
-	size_t getRows() const { return m_rows; }
-	size_t getSlices() const { return m_slices; }
+	size_t columns() const { return m_columns; }
+	size_t rows() const { return m_rows; }
+	size_t slices() const { return m_slices; }
 
 	/*
 		Access voxel from coordinates
@@ -49,7 +47,11 @@ public:
 	const VoxelType& at(size_t u, size_t v, size_t w) const;
 	VoxelType& at(size_t u, size_t v, size_t w);
 
-	QImage getSlice(size_t sz) const;
+	QImage getX(size_t sz) const;
+	QImage getY(size_t sz) const;
+	QImage getZ(size_t sz) const;
+
+	EqualizedVoxelType equalize(VoxelType value) const;
 
 private:
 
@@ -62,4 +64,15 @@ private:
 	
 	//Data buffer
 	QVector<VoxelType> m_data;
+};
+
+
+class ImageView2D
+{
+
+};
+
+class ImageView3D
+{
+
 };

@@ -6,7 +6,6 @@
 	volume[slices, rows, columns]
 */
 
-#include <QFile>
 #include <QDebug>
 
 #include "Volume.h"
@@ -44,6 +43,26 @@ Volume::Volume(Volume&& volume)
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+//Helper function
+//Convert 16bit voxel value to 8bit
+Volume::EqualizedVoxelType Volume::equalize(VoxelType value) const
+{
+	using SignedVoxelType = typename make_signed<VoxelType>::type;
+
+	const auto val = reinterpret_cast<const SignedVoxelType&>(value);
+	//minimum and maximum
+	const auto min = reinterpret_cast<const SignedVoxelType&>(m_min);
+	const auto max = reinterpret_cast<const SignedVoxelType&>(m_max);
+
+	//const uint8_t col = (uint8_t)(255.0 * ((double)val / 65553.0));
+	//const uint8_t col = val / 256;
+	//const uint8_t col = val;
+
+	//for some reason the conversion formula only works with signed values
+	return 255 - (EqualizedVoxelType)(255.0*((double)val - (double)min) / ((double)(max - min)));
+}
+
+
 //Get voxel value at point
 const Volume::VoxelType& Volume::at(size_t u, size_t v, size_t w) const
 {
@@ -67,7 +86,7 @@ Volume::VoxelType& Volume::at(size_t u, size_t v, size_t w)
 }
 
 
-QImage Volume::getSlice(size_t slice) const
+QImage Volume::getY(size_t slice) const
 {
 	QImage img(m_columns, m_rows, QImage::Format_Grayscale8);
 
@@ -75,17 +94,39 @@ QImage Volume::getSlice(size_t slice) const
 	{
 		for (size_t i = 0; i < img.width(); i++)
 		{
-			const VoxelType v = at(i, j, slice);
-			const short val = reinterpret_cast<const short&>(v);
+			quint8 col = equalize(at(i, j, slice));
+			img.setPixel(i, j, qRgb(col, col, col));
+		}
+	}
 
-			short min = reinterpret_cast<const short&>(m_min);
-			short max = reinterpret_cast<const short&>(m_max);
+	return img;
+}
 
-			const uint8_t col = 255 - (uint8_t)(255.0*((double)val - (double)min) / ((double)(max - min)));
-			//const uint8_t col = (uint8_t)(255.0 * ((double)val / 65553.0));
-			//const uint8_t col = val / 256;
-			//const uint8_t col = val;
+QImage Volume::getX(size_t row) const
+{
+	QImage img(m_rows, m_slices, QImage::Format_Grayscale8);
 
+	for (size_t j = 0; j < img.height(); j++)
+	{
+		for (size_t i = 0; i < img.width(); i++)
+		{
+			quint8 col = equalize(at(i, row, j));
+			img.setPixel(i, j, qRgb(col, col, col));
+		}
+	}
+
+	return img;
+}
+
+QImage Volume::getZ(size_t column) const
+{
+	QImage img(m_columns, m_slices, QImage::Format_Grayscale8);
+
+	for (size_t j = 0; j < img.height(); j++)
+	{
+		for (size_t i = 0; i < img.width(); i++)
+		{
+			quint8 col = equalize(at(column, i, j));
 			img.setPixel(i, j, qRgb(col, col, col));
 		}
 	}
