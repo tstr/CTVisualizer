@@ -26,7 +26,7 @@ Volume::Volume(QIODevice& volumeData, size_t columns, size_t rows, size_t slices
 	volumeData.read((char*)m_data.data(), m_data.size() * sizeof(VoxelType));
 
 	//Compute signed minimum and maximum values
-	auto minmax = minmax_element((short*)m_data.begin(), (short*)m_data.end());
+	auto minmax = minmax_element(m_data.begin(), m_data.end());
 	m_max = *minmax.first;
 	m_min = *minmax.second;
 }
@@ -47,21 +47,8 @@ Volume::Volume(Volume&& volume)
 //Convert 16bit voxel value to 8bit
 Volume::EqualizedVoxelType Volume::equalize(VoxelType value) const
 {
-	using SignedVoxelType = typename make_signed<VoxelType>::type;
-
-	const auto val = reinterpret_cast<const SignedVoxelType&>(value);
-	//minimum and maximum
-	const auto min = reinterpret_cast<const SignedVoxelType&>(m_min);
-	const auto max = reinterpret_cast<const SignedVoxelType&>(m_max);
-
-	//const uint8_t col = (uint8_t)(255.0 * ((double)val / 65553.0));
-	//const uint8_t col = val / 256;
-	//const uint8_t col = val;
-
-	//for some reason the conversion formula only works with signed values
-	return 255 - (EqualizedVoxelType)(255.0*((double)val - (double)min) / ((double)(max - min)));
+	return 255 - (EqualizedVoxelType)(255.0*((double)value - (double)m_min) / ((double)(m_max - m_min)));
 }
-
 
 //Get voxel value at point
 const Volume::VoxelType& Volume::at(size_t u, size_t v, size_t w) const

@@ -22,8 +22,9 @@ class Volume
 {
 public:
 
-	using VoxelType = quint16;
+	using VoxelType = qint16;	//signed integer
 	using EqualizedVoxelType = quint8;
+	using IndexType = size_t;
 
 	//Trivially constructable
 	Volume() {}
@@ -44,12 +45,12 @@ public:
 	/*
 		Access voxel from coordinates
 	*/
-	const VoxelType& at(size_t u, size_t v, size_t w) const;
-	VoxelType& at(size_t u, size_t v, size_t w);
+	const VoxelType& at(IndexType u, IndexType v, IndexType w) const;
+	VoxelType& at(IndexType u, IndexType v, IndexType w);
 
-	QImage getX(size_t sz) const;
-	QImage getY(size_t sz) const;
-	QImage getZ(size_t sz) const;
+	QImage getX(IndexType sz) const;
+	QImage getY(IndexType sz) const;
+	QImage getZ(IndexType sz) const;
 
 	EqualizedVoxelType equalize(VoxelType value) const;
 
@@ -64,15 +65,4 @@ private:
 	
 	//Data buffer
 	QVector<VoxelType> m_data;
-};
-
-
-class ImageView2D
-{
-
-};
-
-class ImageView3D
-{
-
 };
