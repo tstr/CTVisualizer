@@ -4,11 +4,14 @@
 #pragma once
 
 #include "Volume.h"
+#include "VolumeEqualization.h"
 
 #include <QMainWindow>
 
 class QSlider;
 class QLabel;
+
+class VolumeSubimage;
 
 class MainWindow : public QMainWindow
 {
@@ -24,11 +27,13 @@ private slots:
 	/*
 		Update image views
 	*/
-	void setImageFront(int value);
 	void setImageSide(int value);
+	void setImageFront(int value);
 	void setImageTop(int value);
 
 private:
+
+	void writeSubimage(QImage& target, const VolumeSubimage& view);
 
 	QWidget* createWidgets();
 	QWidget* createControlArea();
@@ -36,6 +41,7 @@ private:
 
 	//Volume data
 	Volume m_volume;
+	Equalizer m_equalizer;
 
 	//front-back view
 	QSlider* m_zSlider;

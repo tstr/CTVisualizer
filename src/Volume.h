@@ -22,9 +22,69 @@ class Volume
 {
 public:
 
-	using VoxelType = qint16;	//signed integer
-	using EqualizedVoxelType = quint8;
-	using IndexType = size_t;
+	using ElementType = qint16;	//signed integer
+	using Coord = size_t;
+
+	/*
+		Subimage wrapper class
+	*
+	class Subimage
+	{
+	public:
+
+		using SampleFunc = VoxelType(*)(const Subimage*, Coord, Coord);
+
+		//Access
+		VoxelType at(Coord u, Coord v) const
+		{
+			Q_ASSERT(m_volume != nullptr);
+			return m_func(this, u, v);
+		}
+
+		//Sub image properties
+		const Volume* volume() const { return m_volume; }
+		size_t height() const { return m_height; }
+		size_t width() const { return m_width; }
+		size_t index() const { return m_index; }
+
+		QImage toImage() const
+		{
+			Q_ASSERT(m_volume != nullptr);
+
+			QImage img(m_width, m_height, QImage::Format_Grayscale8);
+
+			for (size_t j = 0; j < img.height(); j++)
+			{
+				for (size_t i = 0; i < img.width(); i++)
+				{
+					quint8 col = m_volume->equalize(this->at(i,j));
+					img.setPixel(i, j, qRgb(col, col, col));
+				}
+			}
+
+			return img;
+		}
+
+	private:
+
+		Subimage(const Volume* volume, SampleFunc func, size_t width, size_t height, size_t index) :
+			m_func(func),
+			m_volume(volume),
+			m_width(width),
+			m_height(height),
+			m_index(index)
+		{}
+
+		size_t m_width;
+		size_t m_height;
+		size_t m_index;
+
+		SampleFunc m_func;
+		const Volume* m_volume;
+
+		friend class Volume;
+	};
+	*/
 
 	//Trivially constructable
 	Volume() {}
@@ -45,24 +105,29 @@ public:
 	/*
 		Access voxel from coordinates
 	*/
-	const VoxelType& at(IndexType u, IndexType v, IndexType w) const;
-	VoxelType& at(IndexType u, IndexType v, IndexType w);
+	ElementType at(Coord u, Coord v, Coord w) const;
+	ElementType& at(Coord u, Coord v, Coord w);
 
-	QImage getX(IndexType sz) const;
-	QImage getY(IndexType sz) const;
-	QImage getZ(IndexType sz) const;
+	/*
+		Internal data pointer
+	*/
+	const ElementType* data() const { return &m_data[0]; }
 
-	EqualizedVoxelType equalize(VoxelType value) const;
+	/*
+		Iterators
+	*/
+	QVector<ElementType>::ConstIterator constBegin() const { return m_data.constBegin(); }
+	QVector<ElementType>::ConstIterator constEnd() const { return m_data.constEnd(); }
 
 private:
 
-	VoxelType m_max;
-	VoxelType m_min;
+	ElementType m_max;
+	ElementType m_min;
 
-	size_t m_columns = 0;
-	size_t m_rows = 0;
-	size_t m_slices = 0;
+	size_t m_columns = 0;	//X direction
+	size_t m_rows = 0;		//Y direction
+	size_t m_slices = 0;	//Z direction
 	
 	//Data buffer
-	QVector<VoxelType> m_data;
+	QVector<ElementType> m_data;
 };

@@ -7,6 +7,7 @@
 */
 
 #include <QDebug>
+#include <algorithm>
 
 #include "Volume.h"
 
@@ -23,12 +24,7 @@ Volume::Volume(QIODevice& volumeData, size_t columns, size_t rows, size_t slices
 	m_data.resize(columns * rows * slices);
 
 	//Read directly into buffer
-	volumeData.read((char*)m_data.data(), m_data.size() * sizeof(VoxelType));
-
-	//Compute signed minimum and maximum values
-	auto minmax = minmax_element(m_data.begin(), m_data.end());
-	m_max = *minmax.first;
-	m_min = *minmax.second;
+	volumeData.read((char*)m_data.data(), m_data.size() * sizeof(ElementType));
 }
 
 Volume::Volume(Volume&& volume)
@@ -43,15 +39,8 @@ Volume::Volume(Volume&& volume)
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//Helper function
-//Convert 16bit voxel value to 8bit
-Volume::EqualizedVoxelType Volume::equalize(VoxelType value) const
-{
-	return 255 - (EqualizedVoxelType)(255.0*((double)value - (double)m_min) / ((double)(m_max - m_min)));
-}
-
 //Get voxel value at point
-const Volume::VoxelType& Volume::at(size_t u, size_t v, size_t w) const
+Volume::ElementType Volume::at(Coord u, Coord v, Coord w) const
 {
 	//verify bounds
 	Q_ASSERT(u < m_columns);
@@ -62,7 +51,7 @@ const Volume::VoxelType& Volume::at(size_t u, size_t v, size_t w) const
 }
 
 //Get voxel value at point
-Volume::VoxelType& Volume::at(size_t u, size_t v, size_t w)
+Volume::ElementType& Volume::at(Coord u, Coord v, Coord w)
 {
 	//verify bounds
 	Q_ASSERT(u < m_columns);
@@ -70,55 +59,6 @@ Volume::VoxelType& Volume::at(size_t u, size_t v, size_t w)
 	Q_ASSERT(w < m_slices);
 
 	return m_data[u + m_rows * (v + m_columns * w)];
-}
-
-
-QImage Volume::getY(size_t slice) const
-{
-	QImage img(m_columns, m_rows, QImage::Format_Grayscale8);
-
-	for (size_t j = 0; j < img.height(); j++)
-	{
-		for (size_t i = 0; i < img.width(); i++)
-		{
-			quint8 col = equalize(at(i, j, slice));
-			img.setPixel(i, j, qRgb(col, col, col));
-		}
-	}
-
-	return img;
-}
-
-QImage Volume::getX(size_t row) const
-{
-	QImage img(m_rows, m_slices, QImage::Format_Grayscale8);
-
-	for (size_t j = 0; j < img.height(); j++)
-	{
-		for (size_t i = 0; i < img.width(); i++)
-		{
-			quint8 col = equalize(at(i, row, j));
-			img.setPixel(i, j, qRgb(col, col, col));
-		}
-	}
-
-	return img;
-}
-
-QImage Volume::getZ(size_t column) const
-{
-	QImage img(m_columns, m_slices, QImage::Format_Grayscale8);
-
-	for (size_t j = 0; j < img.height(); j++)
-	{
-		for (size_t i = 0; i < img.width(); i++)
-		{
-			quint8 col = equalize(at(column, i, j));
-			img.setPixel(i, j, qRgb(col, col, col));
-		}
-	}
-
-	return img;
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////

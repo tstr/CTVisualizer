@@ -5,12 +5,14 @@
 #include <QtWidgets>
 
 #include "MainWindow.h"
+#include "Samplers.h"
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 MainWindow::MainWindow(Volume& volume, QWidget *parent) :
 	QMainWindow(parent),
-	m_volume(std::move(volume))
+	m_volume(std::move(volume)),
+	m_equalizer(&m_volume)
 {
 	setWindowTitle("title");
 	setFixedSize(QSize(1280, 720));
@@ -23,19 +25,49 @@ MainWindow::~MainWindow()
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void MainWindow::setImageFront(int value)
+void MainWindow::writeSubimage(QImage& target, const VolumeSubimage& view)
 {
-	m_frontImage->setPixmap(QPixmap::fromImage(m_volume.getX(value)));
-}
+	auto h = target.height();
+	auto w = target.width();
 
-void MainWindow::setImageTop(int value)
-{
-	m_topImage->setPixmap(QPixmap::fromImage(m_volume.getY(value)));
+
+	for (size_t j = 0; j < target.height(); j++)
+	{
+		for (size_t i = 0; i < target.width(); i++)
+		{
+			//quint8 col = view.volume()->equalize(view.at(i,j));
+
+			const auto u = (float)i / target.width();
+			const auto v = (float)j / target.height();
+			
+			const quint8 col = m_equalizer.convert(BasicSampler::sample(view, u, v));
+			target.setPixel(i, j, qRgb(col, col, col));
+		}
+	}
 }
 
 void MainWindow::setImageSide(int value)
 {
-	m_sideImage->setPixmap(QPixmap::fromImage(m_volume.getZ(value)));
+	QImage target(256, 256, QImage::Format_Grayscale8);
+	//writeSubimage(target, m_volume.getZ(value));
+	writeSubimage(target, VolumeSubimage(&m_volume, value, VolumeAxis::XAxis));
+	m_sideImage->setPixmap(QPixmap::fromImage(target));
+}
+
+void MainWindow::setImageFront(int value)
+{
+	QImage target(256, 256, QImage::Format_Grayscale8);
+	//writeSubimage(target, m_volume.getX(value));
+	writeSubimage(target, VolumeSubimage(&m_volume, value, VolumeAxis::YAxis));
+	m_frontImage->setPixmap(QPixmap::fromImage(target));
+}
+
+void MainWindow::setImageTop(int value)
+{
+	QImage target(256, 256, QImage::Format_Grayscale8);
+	//writeSubimage(target, m_volume.getY(value));
+	writeSubimage(target, VolumeSubimage(&m_volume, value, VolumeAxis::ZAxis));
+	m_topImage->setPixmap(QPixmap::fromImage(target));
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
