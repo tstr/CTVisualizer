@@ -10,6 +10,10 @@
 
 #include "Volume.h"
 
+class VolumeSubimageArray;
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+
 enum VolumeAxis
 {
 	XAxis,
@@ -20,6 +24,8 @@ enum VolumeAxis
 class VolumeSubimage
 {
 public:
+
+	friend class VolumeSubimageArray;
 
 	/*
 		Construct a subimage of a volume, bound to a given index along a given axis
@@ -80,3 +86,56 @@ private:
 	size_t m_vWeight;
 	size_t m_idxWeight;
 };
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+
+/*
+	Volume subimage array class
+*/
+class VolumeSubimageArray
+{
+public:
+
+	/*
+		Construct a subimage array for a given axis
+	*/
+	VolumeSubimageArray(const Volume* volume, VolumeAxis axis) :
+		m_subimage(VolumeSubimage(volume, 0, axis))
+	{
+		switch (axis)
+		{
+			case VolumeAxis::XAxis: m_length = volume->columns();
+			case VolumeAxis::YAxis: m_length = volume->rows();
+			case VolumeAxis::ZAxis: m_length = volume->slices();
+		}
+	}
+
+	/*
+		Subimage array length
+	*/
+	size_t length() const { return m_length; }
+
+	/*
+		Subimage dimensions
+		(constant for every subimage in array)
+	*/
+	size_t width() const { return m_subimage.width(); }
+	size_t height() const { return m_subimage.height(); }
+
+	/*
+		Get subimage
+	*/
+	const VolumeSubimage& at(size_t index)
+	{
+		Q_ASSERT(index < m_length);
+		m_subimage.m_index = index;
+		return m_subimage;
+	}
+
+private:
+
+	VolumeSubimage m_subimage;
+	size_t m_length;
+};
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////

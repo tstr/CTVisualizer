@@ -17,8 +17,8 @@ class VolumeRender : public QObject
 {
 	Q_OBJECT
 	Q_DISABLE_COPY(VolumeRender)
-	Q_PROPERTY(bool mip READ mipEnabled WRITE enableMip NOTIFY redrawAll)	 // Maximum intensity projection
-	Q_PROPERTY(bool hist READ histEnabled WRITE enableHist NOTIFY redrawAll) // Histogram equalization
+	Q_PROPERTY(bool mip READ mipEnabled WRITE enableMip)	// Maximum intensity projection
+	Q_PROPERTY(bool hist READ histEnabled WRITE enableHist) // Histogram equalization
 
 public:
 
@@ -30,7 +30,7 @@ public:
 	/*
 		Draw a single subimage
 	*/
-	void draw(QImage& target, quint32 index, VolumeAxis axis);
+	void drawView(QImage& target, quint32 index, VolumeAxis axis);
 
 	/*
 		Get volume data
@@ -60,7 +60,7 @@ signals:
 
 private:
 
-	void drawSubimageMIP(QImage& target, VolumeAxis axis);
+	void drawSubimageMIP(QImage& target, VolumeSubimageArray& viewArray);
 	void drawSubimage(QImage& target, const VolumeSubimage& view);
 
 	//Converts voxel to greyscale value

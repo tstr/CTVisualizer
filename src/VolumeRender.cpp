@@ -24,13 +24,13 @@ quint8 VolumeRender::convert(Volume::ElementType value)
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void VolumeRender::draw(QImage& target, quint32 index, VolumeAxis axis)
+void VolumeRender::drawView(QImage& target, quint32 index, VolumeAxis axis)
 {
 	//If draw using maximum intensity projection
 	if (m_mip)
 	{
 		//Draws all slices
-		drawSubimageMIP(target, axis);
+		drawSubimageMIP(target, VolumeSubimageArray(&m_volume, axis));
 	}
 	else
 	{
@@ -54,17 +54,10 @@ void VolumeRender::drawSubimage(QImage& target, const VolumeSubimage& view)
 	}
 }
 
-void VolumeRender::drawSubimageMIP(QImage& target, VolumeAxis axis)
+void VolumeRender::drawSubimageMIP(QImage& target, VolumeSubimageArray& viewArray)
 {
 	size_t depth = 0;
 
-	//Determine depth of volume in specified axis
-	switch (axis)
-	{
-		case VolumeAxis::XAxis: depth = m_volume.columns();
-		case VolumeAxis::YAxis: depth = m_volume.rows();
-		case VolumeAxis::ZAxis: depth = m_volume.slices();
-	}
 
 	//For each pixel in target
 	for (size_t j = 0; j < target.height(); j++)
@@ -77,12 +70,11 @@ void VolumeRender::drawSubimageMIP(QImage& target, VolumeAxis axis)
 			Volume::ElementType max = INT16_MIN;
 
 			//Fetch maximum value of all slices at this pixel
-			for (size_t k = 0; k < depth; k++)
+			for (size_t k = 0; k < viewArray.length(); k++)
 			{
-				VolumeSubimage view(&m_volume, k, axis);
-
-				Volume::ElementType value = BasicSampler::sample(view, u, v);
-
+				//Sample subimage
+				const Volume::ElementType value = BasicSampler::sample(viewArray.at(k), u, v);
+				//Update max value
 				max = std::max(max, value);
 			}
 
