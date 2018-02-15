@@ -38,27 +38,3 @@ Volume::Volume(Volume&& volume)
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-//Get voxel value at point
-Volume::ElementType Volume::at(Coord u, Coord v, Coord w) const
-{
-	//verify bounds
-	Q_ASSERT(u < m_columns);
-	Q_ASSERT(v < m_rows);
-	Q_ASSERT(w < m_slices);
-
-	return m_data[u + m_rows * (v + m_columns * w)];
-}
-
-//Get voxel value at point
-Volume::ElementType& Volume::at(Coord u, Coord v, Coord w)
-{
-	//verify bounds
-	Q_ASSERT(u < m_columns);
-	Q_ASSERT(v < m_rows);
-	Q_ASSERT(w < m_slices);
-
-	return m_data[u + m_rows * (v + m_columns * w)];
-}
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////

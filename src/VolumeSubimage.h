@@ -70,7 +70,7 @@ private:
 	}
 
 	const Volume* m_volume = nullptr;
-	
+	VolumeAxis m_axis;
 	Volume::Coord m_index = 0;
 	
 	size_t m_width = 0;

@@ -8,7 +8,8 @@
 
 VolumeSubimage::VolumeSubimage(const Volume* volume, Volume::Coord index, VolumeAxis axis) :
 	m_volume(volume),
-	m_index(index)
+	m_index(index),
+	m_axis(axis)
 {
 	Q_ASSERT(m_volume != nullptr);
 

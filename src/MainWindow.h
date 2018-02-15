@@ -3,15 +3,16 @@
 */
 #pragma once
 
-#include "Volume.h"
-#include "VolumeEqualization.h"
-
 #include <QMainWindow>
+
+#include "Volume.h"
 
 class QSlider;
 class QLabel;
+class QCheckBox;
 
-class VolumeSubimage;
+class VolumeRender;
+enum VolumeAxis;
 
 class MainWindow : public QMainWindow
 {
@@ -30,18 +31,23 @@ private slots:
 	void setImageSide(int value);
 	void setImageFront(int value);
 	void setImageTop(int value);
+	void scaleImages(int value);
+
+	//Redraw images
+	void redrawAll();
 
 private:
 
-	void writeSubimage(QImage& target, const VolumeSubimage& view);
+	QPixmap updateImage(int value, VolumeAxis axis);
 
 	QWidget* createWidgets();
 	QWidget* createControlArea();
 	QWidget* createImageArea();
 
-	//Volume data
-	Volume m_volume;
-	Equalizer m_equalizer;
+	//Volume viewer
+	VolumeRender* m_render;
+
+	QImage m_imageBuffer;
 
 	//front-back view
 	QSlider* m_zSlider;
@@ -49,6 +55,13 @@ private:
 	QSlider* m_ySlider;
 	//top-down view
 	QSlider* m_xSlider;
+	//image scale
+	QSlider* m_scaleSlider;
+
+	//histogram equalization toggle
+	QCheckBox* m_heToggle;
+	//mip toggle
+	QCheckBox* m_mipToggle;
 
 	//Image view widgets
 	QLabel* m_topImage;

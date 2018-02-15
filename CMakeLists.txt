@@ -28,10 +28,10 @@ set(sources
 	src/MainWindow.cpp
 	src/Volume.h
 	src/Volume.cpp
-	src/VolumeProcessing.h
+	src/VolumeRender.h
+	src/VolumeRender.cpp
 	src/VolumeSubimage.h
 	src/VolumeSubimage.cpp
-	src/VolumeEqualization.h
 	src/Samplers.h
 )
 

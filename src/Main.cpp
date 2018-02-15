@@ -14,7 +14,7 @@ int main(int argc, char* argv[])
 
 	if (!file.open(QIODevice::ReadOnly))
 	{
-		QMessageBox::critical(nullptr, QStringLiteral("Error"), file.errorString());
+		QMessageBox::critical(nullptr, QStringLiteral("CThead error"), file.errorString());
 		return -1;
 	}
 
