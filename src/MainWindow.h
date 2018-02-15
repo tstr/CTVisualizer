@@ -5,14 +5,11 @@
 
 #include <QMainWindow>
 
-#include "Volume.h"
+#include "VolumeRender.h"
 
 class QSlider;
 class QLabel;
 class QCheckBox;
-
-class VolumeRender;
-enum VolumeAxis;
 
 class MainWindow : public QMainWindow
 {
@@ -45,7 +42,7 @@ private:
 	QWidget* createImageArea();
 
 	//Volume viewer
-	VolumeRender* m_render;
+	VolumeRender m_render;
 
 	QImage m_imageBuffer;
 

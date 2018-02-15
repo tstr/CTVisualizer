@@ -30,7 +30,7 @@ public:
 	/*
 		Construct a subimage of a volume, bound to a given index along a given axis
 	*/
-	VolumeSubimage(const Volume* volume, Volume::Coord index, VolumeAxis axis);
+	VolumeSubimage(const Volume* volume, Volume::Index index, VolumeAxis axis);
 
 	/*
 		Subimage dimensions
@@ -51,7 +51,7 @@ public:
 	/*
 		Fetch a value at the given uv coordinates
 	*/
-	Volume::ElementType at(Volume::Coord u, Volume::Coord v) const
+	Volume::ElementType at(Volume::Index u, Volume::Index v) const
 	{
 		Q_ASSERT(m_volume != nullptr);
 		return m_volume->data()[computeIndex(u, v)];
@@ -60,7 +60,7 @@ public:
 private:
 
 	//Compute index into volume array from Subimage uv's
-	Volume::Coord computeIndex(Volume::Coord u, Volume::Coord v) const
+	Volume::Index computeIndex(Volume::Index u, Volume::Index v) const
 	{
 		Q_ASSERT(u < m_width);
 		Q_ASSERT(v < m_height);
@@ -77,7 +77,7 @@ private:
 
 	const Volume* m_volume = nullptr;
 	VolumeAxis m_axis;
-	Volume::Coord m_index = 0;
+	Volume::Index m_index = 0;
 	
 	size_t m_width = 0;
 	size_t m_height = 0;

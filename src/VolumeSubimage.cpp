@@ -6,7 +6,7 @@
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-VolumeSubimage::VolumeSubimage(const Volume* volume, Volume::Coord index, VolumeAxis axis) :
+VolumeSubimage::VolumeSubimage(const Volume* volume, Volume::Index index, VolumeAxis axis) :
 	m_volume(volume),
 	m_index(index),
 	m_axis(axis)

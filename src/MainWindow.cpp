@@ -14,12 +14,12 @@
 
 MainWindow::MainWindow(Volume& volume, QWidget *parent) :
 	QMainWindow(parent),
-	m_render(new VolumeRender(volume, this))
+	m_render(volume)
 {
 	m_imageBuffer = QImage(256, 256, QImage::Format_Grayscale8);
 
 	setWindowTitle(QStringLiteral("title"));
-	setFixedSize(QSize(1280, 720));
+	resize(QSize(1280, 720));
 	setCentralWidget(createWidgets());
 }
 
@@ -29,10 +29,12 @@ MainWindow::~MainWindow()
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
+//	Image drawing
+//////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 QPixmap MainWindow::updateImage(int value, VolumeAxis axis)
 {
-	m_render->draw(m_imageBuffer, value, axis);
+	m_render.drawView(m_imageBuffer, value, axis);
 	return QPixmap::fromImage(m_imageBuffer);
 }
 
@@ -86,8 +88,8 @@ QWidget* MainWindow::createWidgets()
 	connect(m_scaleSlider, &QSlider::valueChanged, this, &MainWindow::scaleImages);
 
 	//Connect draw options
-	connect(m_mipToggle, &QCheckBox::toggled, m_render, &VolumeRender::enableMip);
-	connect(m_heToggle, &QCheckBox::toggled, m_render, &VolumeRender::enableHist);
+	connect(m_mipToggle, &QCheckBox::toggled, &m_render, &VolumeRender::enableMip);
+	connect(m_heToggle, &QCheckBox::toggled, &m_render, &VolumeRender::enableHist);
 
 	//When MIP is enabled, disable the view sliders
 	connect(m_mipToggle, &QCheckBox::toggled, m_xSlider, &QSlider::setDisabled);
@@ -95,7 +97,7 @@ QWidget* MainWindow::createWidgets()
 	connect(m_mipToggle, &QCheckBox::toggled, m_zSlider, &QSlider::setDisabled);
 
 	//Connect redraw signal
-	connect(m_render, &VolumeRender::redrawAll, this, &MainWindow::redrawAll);
+	connect(&m_render, &VolumeRender::redrawAll, this, &MainWindow::redrawAll);
 
 	m_xSlider->setSliderPosition(76);
 	m_ySlider->setSliderPosition(76);
@@ -137,17 +139,17 @@ QWidget* MainWindow::createControlArea()
 	
 	//X view
 	m_xSlider = new QSlider(Qt::Horizontal, this);
-	m_xSlider->setRange(0, m_render->volume()->rows() - 1);
+	m_xSlider->setRange(0, (int)m_render.volume()->rows() - 1);
 	//Y view
 	m_ySlider = new QSlider(Qt::Horizontal, this);
-	m_ySlider->setRange(0, m_render->volume()->slices() - 1);
+	m_ySlider->setRange(0, (int)m_render.volume()->slices() - 1);
 	//Z view
 	m_zSlider = new QSlider(Qt::Horizontal, this);
-	m_zSlider->setRange(0, m_render->volume()->columns() - 1);
+	m_zSlider->setRange(0, (int)m_render.volume()->columns() - 1);
 	//Scale
 	m_scaleSlider = new QSlider(Qt::Horizontal, this);
 	m_scaleSlider->setRange(IMAGE_SCALE_MIN, IMAGE_SCALE_MAX);
-	m_scaleSlider->setValue(m_render->volume()->columns());
+	m_scaleSlider->setValue((int)m_render.volume()->columns());
 
 	m_mipToggle = new QCheckBox(QStringLiteral("Maximum Intensity Projection"), this);
 	m_heToggle = new QCheckBox(QStringLiteral("Histogram Equalization"), this);

@@ -21,7 +21,7 @@ Volume::Volume(QIODevice& volumeData, size_t columns, size_t rows, size_t slices
 	m_slices(slices)
 {
 	//Reserve space in buffer
-	m_data.resize(columns * rows * slices);
+	m_data.resize((int)columns * rows * slices);
 
 	//Read directly into buffer
 	volumeData.read((char*)m_data.data(), m_data.size() * sizeof(ElementType));

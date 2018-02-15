@@ -4,6 +4,7 @@
 
 #include "VolumeRender.h"
 #include "Samplers.h"
+#include "Effect.h"
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -11,7 +12,7 @@ VolumeRender::VolumeRender(Volume& volume, QObject* parent) :
 	QObject(parent),
 	m_volume(std::move(volume))
 {
-	auto minmax = std::minmax_element(m_volume.constBegin(), m_volume.constEnd());
+	auto minmax = std::minmax_element(m_volume.begin(), m_volume.end());
 	m_max = *minmax.first;
 	m_min = *minmax.second;
 }
@@ -26,61 +27,35 @@ quint8 VolumeRender::convert(Volume::ElementType value)
 
 void VolumeRender::drawView(QImage& target, quint32 index, VolumeAxis axis)
 {
-	//If draw using maximum intensity projection
+	//If maximum intensity projection enabled
 	if (m_mip)
 	{
-		//Draws all slices
-		drawSubimageMIP(target, VolumeSubimageArray(&m_volume, axis));
-	}
-	else
-	{
-		//Draws single slice, specified by index
-		drawSubimage(target, VolumeSubimage(&m_volume, index, axis));
-	}
-}
+		//Draw using MIP
+		VolumeSubimageArray viewArray(&m_volume, axis);
 
-void VolumeRender::drawSubimage(QImage& target, const VolumeSubimage& view)
-{
-	for (size_t j = 0; j < target.height(); j++)
-	{
-		for (size_t i = 0; i < target.width(); i++)
-		{
-			const auto u = (float)i / target.width();
-			const auto v = (float)j / target.height();
-
-			const quint8 col = convert(BasicSampler::sample(view, u, v));
-			target.setPixel(i, j, qRgb(col, col, col));
-		}
-	}
-}
-
-void VolumeRender::drawSubimageMIP(QImage& target, VolumeSubimageArray& viewArray)
-{
-	size_t depth = 0;
-
-
-	//For each pixel in target
-	for (size_t j = 0; j < target.height(); j++)
-	{
-		for (size_t i = 0; i < target.width(); i++)
-		{
-			const auto u = (float)i / target.width();
-			const auto v = (float)j / target.height();
-
+		Effect::apply(target, [&viewArray, this](const UV& coords)->quint8{
 			Volume::ElementType max = INT16_MIN;
 
 			//Fetch maximum value of all slices at this pixel
 			for (size_t k = 0; k < viewArray.length(); k++)
 			{
 				//Sample subimage
-				const Volume::ElementType value = BasicSampler::sample(viewArray.at(k), u, v);
+				const Volume::ElementType value = BasicSampler::sample(viewArray.at(k), coords);
 				//Update max value
 				max = std::max(max, value);
 			}
 
-			const quint8 col = convert(max);
-			target.setPixel(i, j, qRgb(col, col, col));
-		}
+			return this->convert(max);
+		});
+	}
+	//Otherwise just draw a single slice
+	else
+	{
+		VolumeSubimage view(&m_volume, index, axis);
+
+		Effect::apply(target, [&view, this](const UV& coords)->quint8 {
+			return this->convert(BasicSampler::sample(view, coords));
+		});
 	}
 }
 

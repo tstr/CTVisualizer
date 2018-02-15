@@ -60,9 +60,6 @@ signals:
 
 private:
 
-	void drawSubimageMIP(QImage& target, VolumeSubimageArray& viewArray);
-	void drawSubimage(QImage& target, const VolumeSubimage& view);
-
 	//Converts voxel to greyscale value
 	quint8 convert(Volume::ElementType value);
 

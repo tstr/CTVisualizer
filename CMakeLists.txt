@@ -33,6 +33,7 @@ set(sources
 	src/VolumeSubimage.h
 	src/VolumeSubimage.cpp
 	src/Samplers.h
+    src/Effect.h
 )
 
 add_executable(Application WIN32

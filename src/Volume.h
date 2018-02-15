@@ -23,7 +23,7 @@ class Volume
 public:
 
 	using ElementType = qint16;	//signed integer
-	using Coord = size_t;
+	using Index = size_t;
 
 	//Trivially constructable
 	Volume() {}
@@ -44,24 +44,24 @@ public:
 	/*
 		Access voxel from coordinates
 	*/
-	Volume::ElementType at(Coord u, Coord v, Coord w) const
+	Volume::ElementType at(Index u, Index v, Index w) const
 	{
 		//verify bounds
 		Q_ASSERT(u < m_columns);
 		Q_ASSERT(v < m_rows);
 		Q_ASSERT(w < m_slices);
 
-		return m_data[u + m_rows * (v + m_columns * w)];
+		return m_data[(int)u + (int)m_rows * (int)(v + m_columns * w)];
 	}
 
-	Volume::ElementType& at(Coord u, Coord v, Coord w)
+	Volume::ElementType& at(Index u, Index v, Index w)
 	{
 		//verify bounds
 		Q_ASSERT(u < m_columns);
 		Q_ASSERT(v < m_rows);
 		Q_ASSERT(w < m_slices);
 
-		return m_data[u + m_rows * (v + m_columns * w)];
+		return m_data[(int)u + (int)m_rows * (int)(v + m_columns * w)];
 	}
 
 	/*
@@ -72,8 +72,8 @@ public:
 	/*
 		Iterators
 	*/
-	QVector<ElementType>::ConstIterator constBegin() const { return m_data.constBegin(); }
-	QVector<ElementType>::ConstIterator constEnd() const { return m_data.constEnd(); }
+	QVector<ElementType>::const_iterator begin() const { return m_data.begin(); }
+	QVector<ElementType>::const_iterator end() const { return m_data.end(); }
 
 private:
 
