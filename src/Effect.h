@@ -6,7 +6,8 @@
 #include <QImage>
 
 /*
-	Applies a function to every texel in a given target image where the result is stored
+	Applies a function to every texel in a given target image where the result is stored.
+	Similar to a pixel/fragment shader.
 
 	Function must take a UV as an argument and return a byte value
 */
@@ -14,8 +15,8 @@ class Effect
 {
 public:
 
-	template<typename FuncType>
-	static void apply(QImage& target, const FuncType& function)
+	template<typename PixelFunc>
+	static void apply(QImage& target, const PixelFunc& pixel)
 	{
 		//Compute coordinate derivatives
 		const float ddu = 1.0f / target.width();
@@ -30,7 +31,7 @@ public:
 				const auto v = (float)j / target.height();
 
 				//Apply function
-				const quint8 col = function(UV( u, v, ddu, ddv ));
+				const quint8 col = pixel(UV( u, v, ddu, ddv ));
 
 				//Store result
 				target.setPixel(i, j, qRgb((int)col, (int)col, (int)col));

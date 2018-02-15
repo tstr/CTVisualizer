@@ -40,7 +40,7 @@ void VolumeRender::drawView(QImage& target, quint32 index, VolumeAxis axis)
 			for (size_t k = 0; k < viewArray.length(); k++)
 			{
 				//Sample subimage
-				const Volume::ElementType value = BasicSampler::sample(viewArray.at(k), coords);
+				const Volume::ElementType value = BilinearSampler::sample(viewArray.at(k), coords);
 				//Update max value
 				max = std::max(max, value);
 			}
@@ -54,7 +54,7 @@ void VolumeRender::drawView(QImage& target, quint32 index, VolumeAxis axis)
 		VolumeSubimage view(&m_volume, index, axis);
 
 		Effect::apply(target, [&view, this](const UV& coords)->quint8 {
-			return this->convert(BasicSampler::sample(view, coords));
+			return this->convert(BilinearSampler::sample(view, coords));
 		});
 	}
 }
