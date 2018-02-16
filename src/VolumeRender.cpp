@@ -12,9 +12,9 @@ VolumeRender::VolumeRender(Volume& volume, QObject* parent) :
 	QObject(parent),
 	m_volume(std::move(volume)),
 	m_histogramEq(&m_volume),
-	m_defaultEq(&m_volume)
+	m_simpleEq(&m_volume)
 {
-	m_eqMapping = m_defaultEq.mapping();
+	m_eqMapping = m_simpleEq.mapping();
 }
 
 //Converts voxel to greyscale value
@@ -37,7 +37,7 @@ void VolumeRender::drawView(QImage& target, quint32 index, VolumeAxis axis)
 			Volume::ElementType max = INT16_MIN;
 			VolumeSubimageArray viewArray(&m_volume, axis);
 
-			//Fetch maximum value of all slices at this pixel
+			//Fetch maximum value of all sizeZ at this pixel
 			for (size_t k = 0; k < viewArray.length(); k++)
 			{
 				//Sample subimage

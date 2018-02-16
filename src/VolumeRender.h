@@ -60,7 +60,7 @@ public slots:
 		}
 		else
 		{
-			m_eqMapping = m_defaultEq.mapping();
+			m_eqMapping = m_simpleEq.mapping();
 		}
 
 		emit redrawAll();
@@ -80,7 +80,7 @@ private:
 
 	//Equalizers
 	HistogramEqualizer m_histogramEq;
-	SimpleEqualizer m_defaultEq;
+	SimpleEqualizer m_simpleEq;
 	//Current equalizer mapping table
 	const quint8* m_eqMapping;
 

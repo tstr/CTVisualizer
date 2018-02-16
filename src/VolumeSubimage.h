@@ -30,7 +30,7 @@ public:
 	/*
 		Construct a subimage of a volume, bound to a given index along a given axis
 	*/
-	VolumeSubimage(const Volume* volume, Volume::Index index, VolumeAxis axis);
+	VolumeSubimage(const Volume* volume, Volume::IndexType index, VolumeAxis axis);
 
 	/*
 		Subimage dimensions
@@ -39,7 +39,7 @@ public:
 	size_t width() const { return m_width; }
 
 	/*
-		Index of subimage
+		IndexType of subimage
 	*/
 	size_t index() const { return m_index; }
 
@@ -51,7 +51,7 @@ public:
 	/*
 		Fetch a value at the given uv coordinates
 	*/
-	Volume::ElementType at(Volume::Index u, Volume::Index v) const
+	Volume::ElementType at(Volume::IndexType u, Volume::IndexType v) const
 	{
 		Q_ASSERT(m_volume != nullptr);
 		return m_volume->data()[computeIndex(u, v)];
@@ -60,7 +60,7 @@ public:
 private:
 
 	//Compute index into volume array from Subimage uv's
-	inline Volume::Index computeIndex(Volume::Index u, Volume::Index v) const
+	inline Volume::IndexType computeIndex(Volume::IndexType u, Volume::IndexType v) const
 	{
 		Q_ASSERT(u < m_width);
 		Q_ASSERT(v < m_height);
@@ -68,16 +68,16 @@ private:
 		/*
 			Formala for getting index into 3D array with 3 coordinate components:
 
-			u + (v * rows) + (w * rows * columns)
+			u + (v * sizeY) + (w * sizeY * sizeX)
 
-			the index/u/v weights are set to either 1/rows/rows*columns depending on the axis
+			the index/u/v weights are set to either 1/sizeY/sizeY*sizeX depending on the axis
 		*/
 		return (m_index * m_idxWeight) + (u * m_uWeight) + (v * m_vWeight);
 	}
 
 	const Volume* m_volume = nullptr;
 	VolumeAxis m_axis;
-	Volume::Index m_index = 0;
+	Volume::IndexType m_index = 0;
 	
 	size_t m_width = 0;
 	size_t m_height = 0;
@@ -105,9 +105,9 @@ public:
 		//Direct address table
 		const size_t lengths[] = 
 		{
-			volume->columns(),
-			volume->rows(),
-			volume->slices()
+			volume->sizeX(),
+			volume->sizeY(),
+			volume->sizeZ()
 		};
 
 		m_length = lengths[axis];

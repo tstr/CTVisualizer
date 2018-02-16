@@ -108,9 +108,9 @@ QWidget* MainWindow::createWidgets()
 	//Connect redraw signal
 	connect(&m_render, &VolumeRender::redrawAll, this, &MainWindow::redrawAll);
 
-	m_xSlider->setSliderPosition(m_render.volume()->rows() / 2);
-	m_ySlider->setSliderPosition(m_render.volume()->columns() / 2);
-	m_zSlider->setSliderPosition(m_render.volume()->slices() / 2);
+	m_xSlider->setSliderPosition((int)m_render.volume()->sizeY() / 2);
+	m_ySlider->setSliderPosition((int)m_render.volume()->sizeX() / 2);
+	m_zSlider->setSliderPosition((int)m_render.volume()->sizeZ() / 2);
 
 	//Central widget
 	QWidget* center = new QWidget(this);
@@ -148,17 +148,17 @@ QWidget* MainWindow::createControlArea()
 	
 	//X view
 	m_xSlider = new QSlider(Qt::Horizontal, this);
-	m_xSlider->setRange(0, (int)m_render.volume()->columns() - 1);
+	m_xSlider->setRange(0, (int)m_render.volume()->sizeX() - 1);
 	//Y view
 	m_ySlider = new QSlider(Qt::Horizontal, this);
-	m_ySlider->setRange(0, (int)m_render.volume()->rows() - 1);
+	m_ySlider->setRange(0, (int)m_render.volume()->sizeY() - 1);
 	//Z view
 	m_zSlider = new QSlider(Qt::Horizontal, this);
-	m_zSlider->setRange(0, (int)m_render.volume()->slices() - 1);
+	m_zSlider->setRange(0, (int)m_render.volume()->sizeZ() - 1);
 	//Scale
 	m_scaleSlider = new QSlider(Qt::Horizontal, this);
 	m_scaleSlider->setRange(IMAGE_SCALE_MIN, IMAGE_SCALE_MAX);
-	m_scaleSlider->setValue((int)m_render.volume()->columns());
+	m_scaleSlider->setValue((int)m_render.volume()->sizeX());
 
 	m_mipToggle = new QCheckBox(QStringLiteral("Maximum Intensity Projection"), this);
 	m_heToggle = new QCheckBox(QStringLiteral("Histogram Equalization"), this);

@@ -3,7 +3,7 @@
 
 
 	internal data representation,
-	volume[slices, rows, columns]
+	volume[sizeZ, sizeY, sizeX]
 */
 
 #include <QDebug>
@@ -15,13 +15,13 @@ using namespace std;
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-Volume::Volume(QIODevice& volumeData, size_t columns, size_t rows, size_t slices) :
-	m_columns(columns),
-	m_rows(rows),
-	m_slices(slices)
+Volume::Volume(QIODevice& volumeData, size_t sizeX, size_t sizeY, size_t sizeZ) :
+	m_sizeX(sizeX),
+	m_sizeY(sizeY),
+	m_sizeZ(sizeZ)
 {
 	//Reserve space in buffer
-	m_data.resize((int)columns * rows * slices);
+	m_data.resize((int)sizeX * sizeY * sizeZ);
 
 	//Read directly into buffer
 	volumeData.read((char*)m_data.data(), m_data.size() * sizeof(ElementType));
@@ -29,12 +29,10 @@ Volume::Volume(QIODevice& volumeData, size_t columns, size_t rows, size_t slices
 
 Volume::Volume(Volume&& volume)
 {
-	swap(volume.m_data,	   this->m_data);
-	swap(volume.m_columns, this->m_columns);
-	swap(volume.m_rows,    this->m_rows);
-	swap(volume.m_slices,  this->m_slices);
-	swap(volume.m_max,     this->m_max);
-	swap(volume.m_min,     this->m_min);
+	swap(volume.m_data,  this->m_data);
+	swap(volume.m_sizeX, this->m_sizeX);
+	swap(volume.m_sizeY, this->m_sizeY);
+	swap(volume.m_sizeZ, this->m_sizeZ);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -17,7 +17,7 @@ HistogramEqualizer::HistogramEqualizer(const Volume* volume)
 	m_max = *minmax.second;
 
 	const size_t levels = (m_max - m_min) + 1;
-	const size_t size = volume->rows() * volume->columns() * volume->slices();
+	const size_t size = volume->sizeY() * volume->sizeX() * volume->sizeZ();
 ;
 	//Frequency histogram
 	QVector<size_t> frequencyHistogram(levels);
@@ -35,7 +35,7 @@ HistogramEqualizer::HistogramEqualizer(const Volume* volume)
 	//Initial value
 	tfunction = frequencyHistogram[0];
 
-	for (size_t i = 1; i < levels; i++)
+	for (int i = 1; i < levels; i++)
 	{
 		//Compute function for i
 		tfunction += frequencyHistogram[i];

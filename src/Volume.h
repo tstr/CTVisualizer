@@ -23,12 +23,14 @@ class Volume
 public:
 
 	using ElementType = qint16;	//signed integer
-	using Index = size_t;
+	using IndexType = size_t;
+	using SizeType = size_t;
+	using Iterator = QVector<ElementType>::const_iterator;
 
 	//Trivially constructable
 	Volume() {}
 	//Construct volume from 3D array source
-	Volume(QIODevice& volumeData, size_t columns, size_t rows, size_t slices);
+	Volume(QIODevice& volumeData, SizeType sizeX, SizeType sizeY, SizeType sizeZ);
 	//Not copyable
 	Volume(const Volume&) = delete;
 	//Moveable
@@ -37,31 +39,35 @@ public:
 	/*
 		Get dimensions of volume
 	*/
-	size_t columns() const { return m_columns; }
-	size_t rows() const { return m_rows; }
-	size_t slices() const { return m_slices; }
+
+	//X: number of columns / width of volume
+	SizeType sizeX() const { return m_sizeX; }
+	//Y: number of rows / height of volume
+	SizeType sizeY() const { return m_sizeY; }
+	//Z: number of slices / depth of volume
+	SizeType sizeZ() const { return m_sizeZ; } 
 
 	/*
 		Access voxel from coordinates
 	*/
-	Volume::ElementType at(Index u, Index v, Index w) const
+	Volume::ElementType at(IndexType u, IndexType v, IndexType w) const
 	{
 		//verify bounds
-		Q_ASSERT(u < m_columns);
-		Q_ASSERT(v < m_rows);
-		Q_ASSERT(w < m_slices);
+		Q_ASSERT(u < m_sizeX);
+		Q_ASSERT(v < m_sizeY);
+		Q_ASSERT(w < m_sizeZ);
 
-		return m_data[(int)u + (int)m_rows * (int)(v + m_columns * w)];
+		return m_data[(int)u + (int)m_sizeY * (int)(v + m_sizeX * w)];
 	}
 
-	Volume::ElementType& at(Index u, Index v, Index w)
+	Volume::ElementType& at(IndexType u, IndexType v, IndexType w)
 	{
 		//verify bounds
-		Q_ASSERT(u < m_columns);
-		Q_ASSERT(v < m_rows);
-		Q_ASSERT(w < m_slices);
+		Q_ASSERT(u < m_sizeX);
+		Q_ASSERT(v < m_sizeY);
+		Q_ASSERT(w < m_sizeZ);
 
-		return m_data[(int)u + (int)m_rows * (int)(v + m_columns * w)];
+		return m_data[(int)u + (int)m_sizeY * (int)(v + m_sizeX * w)];
 	}
 
 	/*
@@ -72,17 +78,14 @@ public:
 	/*
 		Iterators
 	*/
-	QVector<ElementType>::const_iterator begin() const { return m_data.begin(); }
-	QVector<ElementType>::const_iterator end() const { return m_data.end(); }
+	Iterator begin() const { return m_data.begin(); }
+	Iterator end() const { return m_data.end(); }
 
 private:
 
-	ElementType m_max;
-	ElementType m_min;
-
-	size_t m_columns = 0;	//X direction
-	size_t m_rows = 0;		//Y direction
-	size_t m_slices = 0;	//Z direction
+	SizeType m_sizeX = 0;
+	SizeType m_sizeY = 0;
+	SizeType m_sizeZ = 0;
 	
 	//Data buffer
 	QVector<ElementType> m_data;

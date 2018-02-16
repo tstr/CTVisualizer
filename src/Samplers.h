@@ -54,8 +54,8 @@ public:
 
 	static Volume::ElementType sample(const VolumeSubimage& view, const UV& coords)
 	{
-		const auto _u = (Volume::Index)(coords.u * (float)view.width());
-		const auto _v = (Volume::Index)(coords.v * (float)view.height());
+		const auto _u = (Volume::IndexType)(coords.u * (float)view.width());
+		const auto _v = (Volume::IndexType)(coords.v * (float)view.height());
 
 		return view.at(_u, _v);
 	}
