@@ -60,7 +60,7 @@ public:
 private:
 
 	//Compute index into volume array from Subimage uv's
-	Volume::Index computeIndex(Volume::Index u, Volume::Index v) const
+	inline Volume::Index computeIndex(Volume::Index u, Volume::Index v) const
 	{
 		Q_ASSERT(u < m_width);
 		Q_ASSERT(v < m_height);
@@ -102,12 +102,15 @@ public:
 	VolumeSubimageArray(const Volume* volume, VolumeAxis axis) :
 		m_subimage(VolumeSubimage(volume, 0, axis))
 	{
-		switch (axis)
+		//Direct address table
+		const size_t lengths[] = 
 		{
-			case VolumeAxis::XAxis: m_length = volume->columns();
-			case VolumeAxis::YAxis: m_length = volume->rows();
-			case VolumeAxis::ZAxis: m_length = volume->slices();
-		}
+			volume->columns(),
+			volume->rows(),
+			volume->slices()
+		};
+
+		m_length = lengths[axis];
 	}
 
 	/*

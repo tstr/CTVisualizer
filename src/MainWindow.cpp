@@ -34,21 +34,30 @@ MainWindow::~MainWindow()
 
 QPixmap MainWindow::updateImage(int value, VolumeAxis axis)
 {
+	//Debug time
+	QElapsedTimer t;
+	t.start();
+	//Draw image
 	m_render.drawView(m_imageBuffer, value, axis);
+	quint64 e = t.elapsed();
+
+	//Print debug
+	qDebug() << "axis:" << axis << " -- elapsed: " << e << "ms";
+
 	return QPixmap::fromImage(m_imageBuffer);
 }
 
-void MainWindow::setImageSide(int value)
+void MainWindow::updateImageSide(int value)
 {
 	m_sideImage->setPixmap(updateImage(value, VolumeAxis::XAxis));
 }
 
-void MainWindow::setImageFront(int value)
+void MainWindow::updateImageFront(int value)
 {
 	m_frontImage->setPixmap(updateImage(value, VolumeAxis::YAxis));
 }
 
-void MainWindow::setImageTop(int value)
+void MainWindow::updateImageTop(int value)
 {
 	m_topImage->setPixmap(updateImage(value, VolumeAxis::ZAxis));
 }
@@ -62,9 +71,9 @@ void MainWindow::scaleImages(int value)
 
 void MainWindow::redrawAll()
 {
-	setImageSide(m_xSlider->value());
-	setImageFront(m_ySlider->value());
-	setImageTop(m_zSlider->value());
+	updateImageFront(m_xSlider->value());
+	updateImageSide(m_ySlider->value());
+	updateImageTop(m_zSlider->value());
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -81,9 +90,9 @@ QWidget* MainWindow::createWidgets()
 	*/
 
 	//Connect sliders
-	connect(m_xSlider, &QSlider::valueChanged, this, &MainWindow::setImageFront);
-	connect(m_ySlider, &QSlider::valueChanged, this, &MainWindow::setImageTop);
-	connect(m_zSlider, &QSlider::valueChanged, this, &MainWindow::setImageSide);
+	connect(m_xSlider, &QSlider::valueChanged, this, &MainWindow::updateImageFront);
+	connect(m_ySlider, &QSlider::valueChanged, this, &MainWindow::updateImageSide);
+	connect(m_zSlider, &QSlider::valueChanged, this, &MainWindow::updateImageTop);
 
 	connect(m_scaleSlider, &QSlider::valueChanged, this, &MainWindow::scaleImages);
 
@@ -99,9 +108,9 @@ QWidget* MainWindow::createWidgets()
 	//Connect redraw signal
 	connect(&m_render, &VolumeRender::redrawAll, this, &MainWindow::redrawAll);
 
-	m_xSlider->setSliderPosition(76);
-	m_ySlider->setSliderPosition(76);
-	m_zSlider->setSliderPosition(76);
+	m_xSlider->setSliderPosition(m_render.volume()->rows() / 2);
+	m_ySlider->setSliderPosition(m_render.volume()->columns() / 2);
+	m_zSlider->setSliderPosition(m_render.volume()->slices() / 2);
 
 	//Central widget
 	QWidget* center = new QWidget(this);
@@ -139,13 +148,13 @@ QWidget* MainWindow::createControlArea()
 	
 	//X view
 	m_xSlider = new QSlider(Qt::Horizontal, this);
-	m_xSlider->setRange(0, (int)m_render.volume()->rows() - 1);
+	m_xSlider->setRange(0, (int)m_render.volume()->columns() - 1);
 	//Y view
 	m_ySlider = new QSlider(Qt::Horizontal, this);
-	m_ySlider->setRange(0, (int)m_render.volume()->slices() - 1);
+	m_ySlider->setRange(0, (int)m_render.volume()->rows() - 1);
 	//Z view
 	m_zSlider = new QSlider(Qt::Horizontal, this);
-	m_zSlider->setRange(0, (int)m_render.volume()->columns() - 1);
+	m_zSlider->setRange(0, (int)m_render.volume()->slices() - 1);
 	//Scale
 	m_scaleSlider = new QSlider(Qt::Horizontal, this);
 	m_scaleSlider->setRange(IMAGE_SCALE_MIN, IMAGE_SCALE_MAX);
@@ -155,8 +164,8 @@ QWidget* MainWindow::createControlArea()
 	m_heToggle = new QCheckBox(QStringLiteral("Histogram Equalization"), this);
 
 	ctrlLayout->addRow(QStringLiteral("Front"), m_xSlider);
-	ctrlLayout->addRow(QStringLiteral("Top"), m_ySlider);
-	ctrlLayout->addRow(QStringLiteral("Side"), m_zSlider);
+	ctrlLayout->addRow(QStringLiteral("Side"), m_ySlider);
+	ctrlLayout->addRow(QStringLiteral("Top"), m_zSlider);
 	ctrlLayout->addWidget(new QSplitter(this));
 	ctrlLayout->addRow(QStringLiteral("Scale"), m_scaleSlider);
 	ctrlLayout->addWidget(m_mipToggle);

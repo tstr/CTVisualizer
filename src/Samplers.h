@@ -101,9 +101,11 @@ public:
 		ymin = std::max(ymin, 0.0f);
 		ymax = std::min(ymax, (float)view.height() - 1);
 		
-		//Compute texcoord gradient
-		float xgradient = ((xmax - xmin) == 0) ? 0.0f : (x - xmin) / (xmax - xmin);
-		float ygradient = ((ymax - ymin) == 0) ? 0.0f : (y - ymin) / (ymax - ymin);
+		const float bias = std::numeric_limits<float>::epsilon();
+
+		//Compute texcoord gradient - bias prevents divide by zero errors
+		float xgradient = (x - xmin) / (bias + (xmax - xmin));
+		float ygradient = (y - ymin) / (bias + (ymax - ymin));
 
 		//Interpolate on top 2 texels
 		const Volume::ElementType a0 = view.at(xmin, ymin);
@@ -131,7 +133,7 @@ public:
 
 	static Volume::ElementType sample(const VolumeSubimage& image, const UV& coords)
 	{
-
+		
 	}
 };
 

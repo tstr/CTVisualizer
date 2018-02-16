@@ -25,9 +25,9 @@ private slots:
 	/*
 		Update image views
 	*/
-	void setImageSide(int value);
-	void setImageFront(int value);
-	void setImageTop(int value);
+	void updateImageSide(int value);
+	void updateImageFront(int value);
+	void updateImageTop(int value);
 	void scaleImages(int value);
 
 	//Redraw images

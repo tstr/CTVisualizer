@@ -38,7 +38,7 @@ public:
 			const quint8 col = pixel(UV(u, v, ddu, ddv));
 
 			//Store result
-			target.setPixel(i, j, qRgb((int)col, (int)col, (int)col));
+			target.setPixel((int)i, (int)j, qRgb((int)col, (int)col, (int)col));
 		});
 	}
 };
