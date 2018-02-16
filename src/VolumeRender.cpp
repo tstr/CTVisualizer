@@ -10,17 +10,18 @@
 
 VolumeRender::VolumeRender(Volume& volume, QObject* parent) :
 	QObject(parent),
-	m_volume(std::move(volume))
+	m_volume(std::move(volume)),
+	m_histogramEq(&m_volume),
+	m_defaultEq(&m_volume)
 {
-	auto minmax = std::minmax_element(m_volume.begin(), m_volume.end());
-	m_max = *minmax.first;
-	m_min = *minmax.second;
+	m_eqMapping = m_defaultEq.mapping();
 }
 
 //Converts voxel to greyscale value
-quint8 VolumeRender::convert(Volume::ElementType value)
+quint8 VolumeRender::normalize(Volume::ElementType value)
 {
-	return 255 - (quint8)(255.0*((double)value - (double)m_min) / ((double)(m_max - m_min)));
+	//Lookup equalized value from current mapping table
+	return m_eqMapping[value - m_histogramEq.min()];
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -31,10 +32,10 @@ void VolumeRender::drawView(QImage& target, quint32 index, VolumeAxis axis)
 	if (m_mip)
 	{
 		//Draw using MIP
-		VolumeSubimageArray viewArray(&m_volume, axis);
-
-		Effect::apply(target, [&viewArray, this](const UV& coords)->quint8{
+		Effect::apply(target, [&](UV coords)
+		{
 			Volume::ElementType max = INT16_MIN;
+			VolumeSubimageArray viewArray(&m_volume, axis);
 
 			//Fetch maximum value of all slices at this pixel
 			for (size_t k = 0; k < viewArray.length(); k++)
@@ -45,7 +46,7 @@ void VolumeRender::drawView(QImage& target, quint32 index, VolumeAxis axis)
 				max = std::max(max, value);
 			}
 
-			return this->convert(max);
+			return this->normalize(max);
 		});
 	}
 	//Otherwise just draw a single slice
@@ -53,8 +54,8 @@ void VolumeRender::drawView(QImage& target, quint32 index, VolumeAxis axis)
 	{
 		VolumeSubimage view(&m_volume, index, axis);
 
-		Effect::apply(target, [&view, this](const UV& coords)->quint8 {
-			return this->convert(BilinearSampler::sample(view, coords));
+		Effect::apply(target, [&](UV coords) {
+			return this->normalize(BilinearSampler::sample(view, coords));
 		});
 	}
 }

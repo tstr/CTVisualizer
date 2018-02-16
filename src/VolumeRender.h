@@ -12,6 +12,7 @@
 
 #include "Volume.h"
 #include "VolumeSubimage.h"
+#include "HistogramEqualization.h"
 
 class VolumeRender : public QObject
 {
@@ -51,6 +52,17 @@ public slots:
 	void enableHist(bool enable)
 	{
 		m_hist = enable;
+
+		//Change equalizer mapping
+		if (m_hist)
+		{
+			m_eqMapping = m_histogramEq.mapping();
+		}
+		else
+		{
+			m_eqMapping = m_defaultEq.mapping();
+		}
+
 		emit redrawAll();
 	}
 
@@ -60,14 +72,17 @@ signals:
 
 private:
 
-	//Converts voxel to greyscale value
-	quint8 convert(Volume::ElementType value);
+	//Converts voxel to displayable grayscale value
+	quint8 normalize(Volume::ElementType value);
 
 	//Volume data
 	Volume m_volume;
-	//Volume max/min values
-	Volume::ElementType m_max;
-	Volume::ElementType m_min;
+
+	//Equalizers
+	HistogramEqualizer m_histogramEq;
+	SimpleEqualizer m_defaultEq;
+	//Current equalizer mapping table
+	const quint8* m_eqMapping;
 
 	//Histogram equalization
 	bool m_hist = true;

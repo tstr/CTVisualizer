@@ -34,6 +34,8 @@ set(sources
 	src/VolumeSubimage.cpp
 	src/Samplers.h
     src/Effect.h
+	src/HistogramEqualization.h
+	src/HistogramEqualization.cpp
 	src/util/CountingIterator.h
 )
 
