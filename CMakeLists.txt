@@ -15,7 +15,7 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
-find_package(Qt5 COMPONENTS Widgets REQUIRED)
+find_package(Qt5 COMPONENTS Widgets Concurrent REQUIRED)
 
 ############################################################################################
 
@@ -34,6 +34,7 @@ set(sources
 	src/VolumeSubimage.cpp
 	src/Samplers.h
     src/Effect.h
+	src/util/CountingIterator.h
 )
 
 add_executable(Application WIN32
@@ -43,6 +44,7 @@ add_executable(Application WIN32
 target_link_libraries(Application
   PUBLIC
 	Qt5::Widgets
+    Qt5::Concurrent
 )
 
 # Set up IDE source folders
@@ -68,6 +70,7 @@ file(COPY ${CT_DATASET} DESTINATION ${CMAKE_BINARY_DIR})
 if (WIN32)
 	# Copy Qt DLL's to the same location as the application executable
 	foreach(_target
+        Qt5::Concurrent
 		Qt5::Widgets
 		Qt5::Gui
 		Qt5::Core

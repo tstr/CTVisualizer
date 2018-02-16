@@ -4,6 +4,9 @@
 #pragma once
 
 #include <QImage>
+#include <QtConcurrentMap>
+
+#include "util/CountingIterator.h"
 
 /*
 	Applies a function to every texel in a given target image where the result is stored.
@@ -22,20 +25,20 @@ public:
 		const float ddu = 1.0f / target.width();
 		const float ddv = 1.0f / target.height();
 
-		for (int j = 0; j < target.height(); j++)
-		{
-			for (int i = 0; i < target.width(); i++)
-			{
-				//Relative texture coordinates
-				const auto u = (float)i / target.width();
-				const auto v = (float)j / target.height();
+		QtConcurrent::blockingMap(CountingIterator(0), CountingIterator(target.height() * target.width()), [&](size_t n) {
 
-				//Apply function
-				const quint8 col = pixel(UV( u, v, ddu, ddv ));
+			size_t i = n % target.width();
+			size_t j = n / target.height();
 
-				//Store result
-				target.setPixel(i, j, qRgb((int)col, (int)col, (int)col));
-			}
-		}
+			//Relative texture coordinates
+			const auto u = (float)i / target.width();
+			const auto v = (float)j / target.height();
+
+			//Apply function
+			const quint8 col = pixel(UV(u, v, ddu, ddv));
+
+			//Store result
+			target.setPixel(i, j, qRgb((int)col, (int)col, (int)col));
+		});
 	}
 };
