@@ -39,7 +39,7 @@ public:
 	size_t width() const { return m_width; }
 
 	/*
-		IndexType of subimage
+		Index of subimage
 	*/
 	size_t index() const { return m_index; }
 

@@ -1,20 +1,27 @@
+/*
+	Program entry point
+*/
 
 #include <QApplication>
 #include <QMessageBox>
-#include "MainWindow.h"
-
 #include <QFile>
+#include <QStyleFactory>
+
+#include "MainWindow.h"
 
 int main(int argc, char* argv[])
 {
 	QApplication app(argc, argv);
+
+	//Set application style
+	QApplication::setStyle(QStyleFactory::create("fusion"));
 
 	//Try read volume data
 	QFile file("CThead");
 
 	if (!file.open(QIODevice::ReadOnly))
 	{
-		QMessageBox::critical(nullptr, QStringLiteral("CThead error"), file.errorString());
+		QMessageBox::critical(nullptr, "CThead error", file.errorString());
 		return -1;
 	}
 

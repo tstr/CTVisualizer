@@ -21,10 +21,8 @@ public:
 	template<typename PixelFunc>
 	static void apply(QImage& target, const PixelFunc& pixel)
 	{
-		//Compute coordinate derivatives
-		const float ddu = 1.0f / target.width();
-		const float ddv = 1.0f / target.height();
-
+		//Parallel foreach
+		//Execute the pixel function for every pixel (concurrently)
 		QtConcurrent::blockingMap(CountingIterator(0), CountingIterator(target.height() * target.width()), [&](size_t n) {
 
 			size_t i = n % target.width();
@@ -35,7 +33,7 @@ public:
 			const auto v = (float)j / target.height();
 
 			//Apply function
-			const quint8 col = pixel(UV(u, v, ddu, ddv));
+			const quint8 col = pixel(UV(u, v));
 
 			//Store result
 			target.setPixel((int)i, (int)j, qRgb((int)col, (int)col, (int)col));
