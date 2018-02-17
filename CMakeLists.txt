@@ -80,7 +80,9 @@ if (NOT EXISTS ${CT_DATASET})
 endif()
 
 # Copy dataset to working directory
-file(COPY ${CT_DATASET} DESTINATION ${CMAKE_BINARY_DIR})
+file(COPY ${CT_DATASET} DESTINATION ${PROJECT_BINARY_DIR})
+# Copy config file to working directory
+file(COPY "config.ini" DESTINATION ${PROJECT_BINARY_DIR})
 
 ############################################################################################
 #	Setup installation rules
@@ -92,6 +94,8 @@ include(InstallRequiredSystemLibraries)
 install(TARGETS Application DESTINATION bin)
 # Install CT dataset
 install(FILES ${CT_DATASET} DESTINATION bin)
+# Install config file
+INSTALL(FILES "config.ini" DESTINATION bin)
 
 #
 #	Script adapted from this answer:
