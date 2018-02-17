@@ -6,6 +6,7 @@
 
 #include "MainWindow.h"
 #include "VolumeRender.h"
+#include "util/LabelledSlider.h"
 
 #define IMAGE_SCALE_MIN 128
 #define IMAGE_SCALE_MAX 512
@@ -47,14 +48,14 @@ QPixmap MainWindow::updateImage(int value, VolumeAxis axis)
 	return QPixmap::fromImage(m_imageBuffer);
 }
 
-void MainWindow::updateImageSide(int value)
-{
-	m_sideImage->setPixmap(updateImage(value, VolumeAxis::XAxis));
-}
-
 void MainWindow::updateImageFront(int value)
 {
-	m_frontImage->setPixmap(updateImage(value, VolumeAxis::YAxis));
+	m_frontImage->setPixmap(updateImage(value, VolumeAxis::XAxis));
+}
+
+void MainWindow::updateImageSide(int value)
+{
+	m_sideImage->setPixmap(updateImage(value, VolumeAxis::YAxis));
 }
 
 void MainWindow::updateImageTop(int value)
@@ -108,8 +109,8 @@ QWidget* MainWindow::createWidgets()
 	//Connect redraw signal
 	connect(&m_render, &VolumeRender::redrawAll, this, &MainWindow::redrawAll);
 
-	m_xSlider->setSliderPosition((int)m_render.volume()->sizeY() / 2);
-	m_ySlider->setSliderPosition((int)m_render.volume()->sizeX() / 2);
+	m_xSlider->setSliderPosition((int)m_render.volume()->sizeX() / 2);
+	m_ySlider->setSliderPosition((int)m_render.volume()->sizeY() / 2);
 	m_zSlider->setSliderPosition((int)m_render.volume()->sizeZ() / 2);
 
 	//Central widget
@@ -147,25 +148,25 @@ QWidget* MainWindow::createControlArea()
 	ctrlLayout->setAlignment(Qt::AlignTop | Qt::AlignLeft);
 	
 	//X view
-	m_xSlider = new QSlider(Qt::Horizontal, this);
+	m_xSlider = new LabelledSlider(this);
 	m_xSlider->setRange(0, (int)m_render.volume()->sizeX() - 1);
 	//Y view
-	m_ySlider = new QSlider(Qt::Horizontal, this);
+	m_ySlider = new LabelledSlider(this);
 	m_ySlider->setRange(0, (int)m_render.volume()->sizeY() - 1);
 	//Z view
-	m_zSlider = new QSlider(Qt::Horizontal, this);
+	m_zSlider = new LabelledSlider(this);
 	m_zSlider->setRange(0, (int)m_render.volume()->sizeZ() - 1);
 	//Scale
-	m_scaleSlider = new QSlider(Qt::Horizontal, this);
+	m_scaleSlider = new LabelledSlider(this);
 	m_scaleSlider->setRange(IMAGE_SCALE_MIN, IMAGE_SCALE_MAX);
 	m_scaleSlider->setValue((int)m_render.volume()->sizeX());
 
 	m_mipToggle = new QCheckBox(QStringLiteral("Maximum Intensity Projection"), this);
 	m_heToggle = new QCheckBox(QStringLiteral("Histogram Equalization"), this);
 
-	ctrlLayout->addRow(QStringLiteral("Front"), m_xSlider);
-	ctrlLayout->addRow(QStringLiteral("Side"), m_ySlider);
-	ctrlLayout->addRow(QStringLiteral("Top"), m_zSlider);
+	ctrlLayout->addRow(QStringLiteral("X: Side"), m_xSlider);
+	ctrlLayout->addRow(QStringLiteral("Y: Front"), m_ySlider);
+	ctrlLayout->addRow(QStringLiteral("Z: Top"), m_zSlider);
 	ctrlLayout->addWidget(new QSplitter(this));
 	ctrlLayout->addRow(QStringLiteral("Scale"), m_scaleSlider);
 	ctrlLayout->addWidget(m_mipToggle);

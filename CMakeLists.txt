@@ -37,6 +37,8 @@ set(sources
 	src/HistogramEqualization.h
 	src/HistogramEqualization.cpp
 	src/util/CountingIterator.h
+	src/util/LabelledSlider.h
+	src/util/LabelledSlider.cpp
 )
 
 add_executable(Application WIN32

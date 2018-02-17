@@ -7,9 +7,9 @@
 
 #include "VolumeRender.h"
 
-class QSlider;
 class QLabel;
 class QCheckBox;
+class LabelledSlider;
 
 class MainWindow : public QMainWindow
 {
@@ -47,13 +47,13 @@ private:
 	QImage m_imageBuffer;
 
 	//front-back view
-	QSlider* m_zSlider;
+	LabelledSlider* m_zSlider;
 	//top-down view
-	QSlider* m_ySlider;
+	LabelledSlider* m_ySlider;
 	//top-down view
-	QSlider* m_xSlider;
+	LabelledSlider* m_xSlider;
 	//image scale
-	QSlider* m_scaleSlider;
+	LabelledSlider* m_scaleSlider;
 
 	//histogram equalization toggle
 	QCheckBox* m_heToggle;
