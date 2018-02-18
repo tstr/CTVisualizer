@@ -52,6 +52,7 @@ set(sources
 	src/VolumeRender.cpp
 	src/VolumeSubimage.h
 	src/VolumeSubimage.cpp
+	src/VolumeSubimageRange.h
 	src/Samplers.h
     src/Effect.h
 	src/HistogramEqualization.h

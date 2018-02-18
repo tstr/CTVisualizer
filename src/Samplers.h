@@ -99,7 +99,7 @@ public:
 		const float ygradient = (y - ymin) / (bias + (ymax - ymin));
 
 		//Grab 2x2 texel values
-		const float v[4] =
+		const Volume::ElementType v[4] =
 		{
 			view.at(xmin, ymin), view.at(xmax, ymin),	//top 2 texels
 			view.at(xmin, ymax), view.at(xmax, ymax)	//bottom 2 texels

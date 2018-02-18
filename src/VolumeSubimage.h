@@ -10,7 +10,7 @@
 
 #include "Volume.h"
 
-class VolumeSubimageArray;
+class VolumeSubimageRange;
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -25,7 +25,10 @@ class VolumeSubimage
 {
 public:
 
-	friend class VolumeSubimageArray;
+	friend class VolumeSubimageRange;
+
+	VolumeSubimage() {}
+	VolumeSubimage(const VolumeSubimage&) = default;
 
 	/*
 		Construct a subimage of a volume, bound to a given index along a given axis
@@ -85,60 +88,6 @@ private:
 	Volume::SizeType m_uWeight;
 	Volume::SizeType m_vWeight;
 	Volume::SizeType m_idxWeight;
-};
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////
-
-/*
-	Volume subimage array class
-*/
-class VolumeSubimageArray
-{
-public:
-
-	/*
-		Construct a subimage array for a given axis
-	*/
-	VolumeSubimageArray(const Volume* volume, VolumeAxis axis) :
-		m_subimage(VolumeSubimage(volume, 0, axis))
-	{
-		//Direct address table
-		const Volume::SizeType lengths[] =
-		{
-			volume->sizeX(),
-			volume->sizeY(),
-			volume->sizeZ()
-		};
-
-		m_length = lengths[axis];
-	}
-
-	/*
-		Subimage array length
-	*/
-	Volume::SizeType length() const { return m_length; }
-
-	/*
-		Subimage dimensions
-		(constant for every subimage in array)
-	*/
-	Volume::SizeType width() const { return m_subimage.width(); }
-	Volume::SizeType height() const { return m_subimage.height(); }
-
-	/*
-		Get subimage
-	*/
-	const VolumeSubimage& at(Volume::IndexType index)
-	{
-		Q_ASSERT(index < m_length);
-		m_subimage.m_index = index;
-		return m_subimage;
-	}
-
-private:
-
-	VolumeSubimage m_subimage;
-	Volume::SizeType m_length;
 };
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////

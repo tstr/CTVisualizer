@@ -4,7 +4,10 @@
 
 #include <QElapsedTimer>
 
+//#define NO_PARALLEL_PIXEL_FUNC
+
 #include "VolumeRender.h"
+#include "VolumeSubimageRange.h"
 #include "Samplers.h"
 #include "Effect.h"
 
@@ -62,19 +65,19 @@ void VolumeRender::drawSubimage(QImage& target, quint32 index, VolumeAxis axis)
 	//If maximum intensity projection enabled
 	if (m_mip)
 	{
+		//Construct a range over the given axis
+		VolumeSubimageRange range(&m_volume, axis);
+
 		//Draw using MIP
 		Effect::apply(target, [&](UV coords)
 		{
-			Volume::ElementType max = INT16_MIN;
-			VolumeSubimageArray viewArray(&m_volume, axis);
-
-			//Fetch maximum value of all sizeZ at this pixel
-			for (size_t k = 0; k < viewArray.length(); k++)
+			Volume::ElementType max = std::numeric_limits<Volume::ElementType>::min();
+			
+			//Iterate over every slice
+			for (const VolumeSubimage& view : range)
 			{
-				//Sample subimage
-				const Volume::ElementType value = BilinearSampler::sample(viewArray.at(k), coords);
-				//Update max value
-				max = std::max(max, value);
+				//Override max if sampled value is greater
+				max = std::max(max, BilinearSampler::sample(view, coords));
 			}
 
 			return this->normalize(max);
