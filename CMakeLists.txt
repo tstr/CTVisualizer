@@ -8,16 +8,28 @@ cmake_minimum_required(VERSION 3.8.0)
 
 project(CS255-Assignment)
 
-# Hardcode Qt5 sdk location for now
-#set(CMAKE_PREFIX_PATH "G:/Qt/5.8/msvc2015_64/")
+# Configure CMake variables
 
+set(CMAKE_DEBUG_POSTFIX "d")
+
+# Qt tools
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
+# default build type is release
+if (NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
+	message(STATUS "No CMAKE_BUILD_TYPE was specified, setting to Release")
+	set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Choose build type" FORCE)
+endif()
+
+############################################################################################
+#	Finding Qt SDK
+############################################################################################
+
 message(STATUS "Finding Qt5 SDK...")
 
-find_package(Qt5 COMPONENTS Widgets Concurrent REQUIRED)
+find_package(Qt5 CONFIG COMPONENTS Widgets Concurrent PATH_SUFFIXES "lib/cmake/Qt5" REQUIRED)
 
 if (Qt5_FOUND)
 	message(STATUS "Qt5 SDK found: ${Qt5_DIR}")
@@ -70,13 +82,13 @@ source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}" FILES ${sources})
 set_property(GLOBAL PROPERTY AUTOGEN_SOURCE_GROUP "generated")
 
 ############################################################################################
-#	Find CThead data set
+#	Find volume dataset
 ############################################################################################
 
-find_file(CT_DATASET NAME "CThead" PATHS "${CMAKE_SOURCE_DIR}" DOC "Volume dataset" NO_DEFAULT_PATH)
+set(CT_DATASET "${PROJECT_SOURCE_DIR}/CThead" CACHE FILEPATH "Volume dataset")
 
 if (NOT EXISTS ${CT_DATASET})
-	message(ERROR "Could not find CThead dataset")
+	message(FATAL_ERROR "Could not find volume dataset")
 endif()
 
 # Copy dataset to working directory
@@ -95,7 +107,7 @@ install(TARGETS Application DESTINATION bin)
 # Install CT dataset
 install(FILES ${CT_DATASET} DESTINATION bin)
 # Install config file
-INSTALL(FILES "config.ini" DESTINATION bin)
+install(FILES "config.ini" DESTINATION bin)
 
 #
 #	Script adapted from this answer:
@@ -132,8 +144,15 @@ if (WIN32)
 		# execute windeployqt in a tmp directory
 		add_custom_target(DEPLOY ALL
 			COMMAND ${CMAKE_COMMAND} -E remove_directory "${CMAKE_CURRENT_BINARY_DIR}/windeployqt"
-			#COMMAND set PATH=%PATH%$<SEMICOLON>${qt5_install_prefix}/bin
-			COMMAND Qt5::windeployqt --dir "${CMAKE_CURRENT_BINARY_DIR}/windeployqt" "$<TARGET_FILE:Application>"
+			COMMAND set PATH=%PATH%$<SEMICOLON>${qt5_install_prefix}/bin
+			COMMAND Qt5::windeployqt
+					#$<$<CONFIG:Debug>:"--debug">
+					#$<$<CONFIG:Release>:"--release">
+					--release
+					--no-translations
+					--no-system-d3d-compiler
+					--dir "${CMAKE_CURRENT_BINARY_DIR}/windeployqt"
+					"$<TARGET_FILE:Application>"
 		)
 
 		# copy deployment directory during installation

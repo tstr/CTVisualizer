@@ -37,9 +37,11 @@ int main(int argc, char* argv[])
 		QMessageBox::critical(nullptr, "Volume loader error", file.errorString());
 		return -1;
 	}
-
+	
+	Volume v(file, sizeX, sizeY, sizeZ);
+	
 	//Construct Volume viewer
-	MainWindow window(Volume(file, sizeX, sizeY, sizeZ));
+	MainWindow window(v);
 
 	//Show main window
 	window.show();
