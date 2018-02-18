@@ -86,7 +86,7 @@ public:
 		float ymin = floorf(y);
 		float ymax = ceilf(y);
 
-		//Ensure coordinates are in bounds
+		//Clamp coordinates
 		xmin = std::max(xmin, 0.0f);
 		xmax = std::min(xmax, (float)view.width() - 1);
 		ymin = std::max(ymin, 0.0f);
@@ -95,23 +95,22 @@ public:
 		const float bias = std::numeric_limits<float>::epsilon();
 
 		//Compute texcoord gradient - bias prevents divide by zero errors
-		float xgradient = (x - xmin) / (bias + (xmax - xmin));
-		float ygradient = (y - ymin) / (bias + (ymax - ymin));
+		const float xgradient = (x - xmin) / (bias + (xmax - xmin));
+		const float ygradient = (y - ymin) / (bias + (ymax - ymin));
 
-		//Interpolate on top 2 texels
-		const Volume::ElementType a0 = view.at(xmin, ymin);
-		const Volume::ElementType a1 = view.at(xmax, ymin);
-
-		const auto alerp = lerp(a0, a1, xgradient);
-
-		//Interpolate on bottom 2 texels
-		const Volume::ElementType b0 = view.at(xmin, ymax);
-		const Volume::ElementType b1 = view.at(xmax, ymax);
-
-		const auto blerp = lerp(b0, b1, xgradient);
+		//Grab 2x2 texel values
+		const float v[4] =
+		{
+			view.at(xmin, ymin), view.at(xmax, ymin),	//top 2 texels
+			view.at(xmin, ymax), view.at(xmax, ymax)	//bottom 2 texels
+		};
 
 		//Interpolate between two results along the y axis
-		return lerp(alerp, blerp, ygradient);
+		return lerp(
+			lerp(v[0], v[1], xgradient),
+			lerp(v[2], v[3], xgradient),
+			ygradient
+		);
 	}
 };
 
@@ -168,11 +167,11 @@ public:
 		//const float ygradient = y - ymin;
 
 		//Sample within bounds - helper function
-		auto sm = [&](size_t u, size_t v)->float
+		auto sm = [&](Volume::IndexType u, Volume::IndexType v)->float
 		{
 			//Ensure uv's are in bounds when sampling
-			u = std::max(std::min(u, view.width() - 1), (size_t)0);
-			v = std::max(std::min(v, view.height() - 1), (size_t)0);
+			u = std::max(std::min(u, view.width() - 1), 0u);
+			v = std::max(std::min(v, view.height() - 1), 0u);
 			return (float)view.at(u, v);
 		};
 

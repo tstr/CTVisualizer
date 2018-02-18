@@ -30,13 +30,17 @@ private slots:
 	void updateImageTop(int value);
 	void scaleImages(int value);
 
-	//Redraw images
+	/*
+		Displayed images
+	*/
 	void redrawAll();
 
 private:
 
-	QPixmap updateImage(int value, VolumeAxis axis);
+	//Resizes targets
+	void resizeTargets(float scaleFactor);
 
+	//Create gui widgets
 	QWidget* createWidgets();
 	QWidget* createControlArea();
 	QWidget* createImageArea();
@@ -44,7 +48,10 @@ private:
 	//Volume viewer
 	VolumeRender m_render;
 
-	QImage m_imageBuffer;
+	//Image targets
+	QImage m_xTarget;
+	QImage m_yTarget;
+	QImage m_zTarget;
 
 	//front-back view
 	LabelledSlider* m_zSlider;

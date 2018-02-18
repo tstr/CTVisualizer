@@ -2,6 +2,8 @@
 	Volume rendering class
 */
 
+#include <QElapsedTimer>
+
 #include "VolumeRender.h"
 #include "Samplers.h"
 #include "Effect.h"
@@ -26,8 +28,37 @@ quint8 VolumeRender::normalize(Volume::ElementType value)
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void VolumeRender::drawView(QImage& target, quint32 index, VolumeAxis axis)
+void VolumeRender::enableMip(bool enable)
 {
+	m_mip = enable;
+	emit redrawAll();
+}
+
+void VolumeRender::enableHist(bool enable)
+{
+	m_hist = enable;
+
+	//Change equalizer mapping
+	if (m_hist)
+	{
+		m_eqMapping = m_histogramEq.mapping();
+	}
+	else
+	{
+		m_eqMapping = m_simpleEq.mapping();
+	}
+
+	emit redrawAll();
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void VolumeRender::drawSubimage(QImage& target, quint32 index, VolumeAxis axis)
+{
+	//Debug time
+	QElapsedTimer t;
+	t.start();
+
 	//If maximum intensity projection enabled
 	if (m_mip)
 	{
@@ -58,6 +89,9 @@ void VolumeRender::drawView(QImage& target, quint32 index, VolumeAxis axis)
 			return this->normalize(BilinearSampler::sample(view, coords));
 		});
 	}
+
+	//Print debug
+	qDebug() << "axis:" << axis << " -- elapsed: " << t.elapsed() << "ms";
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

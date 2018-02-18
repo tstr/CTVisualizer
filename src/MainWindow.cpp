@@ -8,8 +8,10 @@
 #include "VolumeRender.h"
 #include "util/LabelledSlider.h"
 
-#define IMAGE_SCALE_MIN 128
-#define IMAGE_SCALE_MAX 512
+#define IMAGE_SCALE_MIN 10
+#define IMAGE_SCALE_MAX 200
+#define CTRL_WIDGET_WIDTH_MIN 400
+#define CTRL_WIDGET_WIDTH_MAX 400
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -17,7 +19,7 @@ MainWindow::MainWindow(Volume& volume, QWidget *parent) :
 	QMainWindow(parent),
 	m_render(volume)
 {
-	m_imageBuffer = QImage(256, 256, QImage::Format_Grayscale8);
+	resizeTargets(1.0f);
 
 	setWindowTitle(QStringLiteral("title"));
 	resize(QSize(1280, 720));
@@ -33,40 +35,34 @@ MainWindow::~MainWindow()
 //	Image drawing
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-QPixmap MainWindow::updateImage(int value, VolumeAxis axis)
-{
-	//Debug time
-	QElapsedTimer t;
-	t.start();
-	//Draw image
-	m_render.drawView(m_imageBuffer, value, axis);
-	quint64 e = t.elapsed();
-
-	//Print debug
-	qDebug() << "axis:" << axis << " -- elapsed: " << e << "ms";
-
-	return QPixmap::fromImage(m_imageBuffer);
-}
-
 void MainWindow::updateImageFront(int value)
 {
-	m_frontImage->setPixmap(updateImage(value, VolumeAxis::XAxis));
+	//Draw X
+	m_render.drawSubimage(m_xTarget, value, VolumeAxis::XAxis);
+	m_frontImage->setPixmap(QPixmap::fromImage(m_xTarget));
 }
 
 void MainWindow::updateImageSide(int value)
 {
-	m_sideImage->setPixmap(updateImage(value, VolumeAxis::YAxis));
+	//Draw Y
+	m_render.drawSubimage(m_yTarget, value, VolumeAxis::YAxis);
+	m_sideImage->setPixmap(QPixmap::fromImage(m_yTarget));
 }
 
 void MainWindow::updateImageTop(int value)
 {
-	m_topImage->setPixmap(updateImage(value, VolumeAxis::ZAxis));
+	//Draw Z
+	m_render.drawSubimage(m_zTarget, value, VolumeAxis::ZAxis);
+	m_topImage->setPixmap(QPixmap::fromImage(m_zTarget));
 }
 
 void MainWindow::scaleImages(int value)
 {
-	//Update image buffer size
-	m_imageBuffer = QImage(value, value, QImage::Format_Grayscale8);
+	//Scale percentage value to normalized value
+	float scaleFactor = (float)value / 100.0f;
+
+	resizeTargets(scaleFactor);
+
 	redrawAll();
 }
 
@@ -75,6 +71,21 @@ void MainWindow::redrawAll()
 	updateImageFront(m_xSlider->value());
 	updateImageSide(m_ySlider->value());
 	updateImageTop(m_zSlider->value());
+}
+
+void MainWindow::resizeTargets(float scaleFactor)
+{
+	scaleFactor = std::max(scaleFactor, 0.0f);
+
+	const Volume* v = m_render.volume();
+	const auto xscaled = (Volume::SizeType)(scaleFactor * v->sizeX() * v->scaleX());
+	const auto yscaled = (Volume::SizeType)(scaleFactor * v->sizeY() * v->scaleY());
+	const auto zscaled = (Volume::SizeType)(scaleFactor * v->sizeZ() * v->scaleZ());
+
+	//Scale target images
+	m_xTarget = QImage(yscaled, zscaled, QImage::Format_Grayscale8);
+	m_yTarget = QImage(xscaled, zscaled, QImage::Format_Grayscale8);
+	m_zTarget = QImage(xscaled, yscaled, QImage::Format_Grayscale8);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -159,7 +170,7 @@ QWidget* MainWindow::createControlArea()
 	//Scale
 	m_scaleSlider = new LabelledSlider(this);
 	m_scaleSlider->setRange(IMAGE_SCALE_MIN, IMAGE_SCALE_MAX);
-	m_scaleSlider->setValue((int)m_render.volume()->sizeX());
+	m_scaleSlider->setValue(100);
 
 	m_mipToggle = new QCheckBox(QStringLiteral("Maximum Intensity Projection"), this);
 	m_heToggle = new QCheckBox(QStringLiteral("Histogram Equalization"), this);
@@ -168,14 +179,14 @@ QWidget* MainWindow::createControlArea()
 	ctrlLayout->addRow(QStringLiteral("Y: Front"), m_ySlider);
 	ctrlLayout->addRow(QStringLiteral("Z: Top"), m_zSlider);
 	ctrlLayout->addWidget(new QSplitter(this));
-	ctrlLayout->addRow(QStringLiteral("Scale"), m_scaleSlider);
+	ctrlLayout->addRow(QStringLiteral("Scale(%)"), m_scaleSlider);
 	ctrlLayout->addWidget(m_mipToggle);
 	ctrlLayout->addWidget(m_heToggle);
 
 	QGroupBox* ctrlGroup = new QGroupBox(QStringLiteral("Options"), this);
 	ctrlGroup->setLayout(ctrlLayout);
-	ctrlGroup->setMaximumWidth(300);
-	ctrlGroup->setMinimumWidth(200);
+	ctrlGroup->setMaximumWidth(CTRL_WIDGET_WIDTH_MAX);
+	ctrlGroup->setMinimumWidth(CTRL_WIDGET_WIDTH_MIN);
 
 	return ctrlGroup;
 }

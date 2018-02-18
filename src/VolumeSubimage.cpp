@@ -14,9 +14,9 @@ VolumeSubimage::VolumeSubimage(const Volume* volume, Volume::IndexType index, Vo
 	Q_ASSERT(m_volume != nullptr);
 
 	//Weighting values for converting (u,v,w) indices into a single index
-	const size_t xWeight = 1;
-	const size_t yWeight = volume->sizeY();
-	const size_t zWeight = volume->sizeX() * volume->sizeY();
+	const Volume::SizeType xWeight = 1;
+	const Volume::SizeType yWeight = volume->sizeY();
+	const Volume::SizeType zWeight = volume->sizeX() * volume->sizeY();
 
 	//Subimage is pointing along the X axis
 	if (axis == VolumeAxis::XAxis)

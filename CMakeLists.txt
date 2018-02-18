@@ -42,6 +42,7 @@ endif()
 ############################################################################################
 
 set(sources
+	config.ini
 	src/Main.cpp
 	src/MainWindow.h
 	src/MainWindow.cpp
@@ -93,8 +94,12 @@ endif()
 
 # Copy dataset to working directory
 file(COPY ${CT_DATASET} DESTINATION ${PROJECT_BINARY_DIR})
+
 # Copy config file to working directory
-file(COPY "config.ini" DESTINATION ${PROJECT_BINARY_DIR})
+configure_file(
+	"${PROJECT_SOURCE_DIR}/config.ini"
+	"${PROJECT_BINARY_DIR}/config.ini"
+)
 
 ############################################################################################
 #	Setup installation rules
@@ -107,7 +112,7 @@ install(TARGETS Application DESTINATION bin)
 # Install CT dataset
 install(FILES ${CT_DATASET} DESTINATION bin)
 # Install config file
-install(FILES "config.ini" DESTINATION bin)
+install(FILES "${PROJECT_BINARY_DIR}/config.ini" DESTINATION bin)
 
 #
 #	Script adapted from this answer:

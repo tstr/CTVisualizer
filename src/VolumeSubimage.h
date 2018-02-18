@@ -35,13 +35,13 @@ public:
 	/*
 		Subimage dimensions
 	*/
-	size_t height() const { return m_height; }
-	size_t width() const { return m_width; }
+	Volume::SizeType height() const { return m_height; }
+	Volume::SizeType width() const { return m_width; }
 
 	/*
 		Index of subimage
 	*/
-	size_t index() const { return m_index; }
+	Volume::IndexType index() const { return m_index; }
 
 	/*
 		Volume itself
@@ -79,12 +79,12 @@ private:
 	VolumeAxis m_axis;
 	Volume::IndexType m_index = 0;
 	
-	size_t m_width = 0;
-	size_t m_height = 0;
+	Volume::SizeType m_width = 0;
+	Volume::SizeType m_height = 0;
 
-	size_t m_uWeight;
-	size_t m_vWeight;
-	size_t m_idxWeight;
+	Volume::SizeType m_uWeight;
+	Volume::SizeType m_vWeight;
+	Volume::SizeType m_idxWeight;
 };
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -103,7 +103,7 @@ public:
 		m_subimage(VolumeSubimage(volume, 0, axis))
 	{
 		//Direct address table
-		const size_t lengths[] = 
+		const Volume::SizeType lengths[] =
 		{
 			volume->sizeX(),
 			volume->sizeY(),
@@ -116,19 +116,19 @@ public:
 	/*
 		Subimage array length
 	*/
-	size_t length() const { return m_length; }
+	Volume::SizeType length() const { return m_length; }
 
 	/*
 		Subimage dimensions
 		(constant for every subimage in array)
 	*/
-	size_t width() const { return m_subimage.width(); }
-	size_t height() const { return m_subimage.height(); }
+	Volume::SizeType width() const { return m_subimage.width(); }
+	Volume::SizeType height() const { return m_subimage.height(); }
 
 	/*
 		Get subimage
 	*/
-	const VolumeSubimage& at(size_t index)
+	const VolumeSubimage& at(Volume::IndexType index)
 	{
 		Q_ASSERT(index < m_length);
 		m_subimage.m_index = index;
@@ -138,7 +138,7 @@ public:
 private:
 
 	VolumeSubimage m_subimage;
-	size_t m_length;
+	Volume::SizeType m_length;
 };
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////

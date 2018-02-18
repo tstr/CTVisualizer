@@ -7,6 +7,7 @@
 #include <QtConcurrentMap>
 
 #include "util/CountingIterator.h"
+#include <QDebug>
 
 /*
 	Applies a function to every texel in a given target image where the result is stored.
@@ -26,7 +27,7 @@ public:
 		QtConcurrent::blockingMap(CountingIterator(0), CountingIterator(target.height() * target.width()), [&](size_t n) {
 
 			size_t i = n % target.width();
-			size_t j = n / target.height();
+			size_t j = n / target.width();
 
 			//Relative texture coordinates
 			const auto u = (float)i / target.width();

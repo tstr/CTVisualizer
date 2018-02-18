@@ -31,7 +31,7 @@ public:
 	/*
 		Draw a single subimage
 	*/
-	void drawView(QImage& target, quint32 index, VolumeAxis axis);
+	void drawSubimage(QImage& target, quint32 index, VolumeAxis axis);
 
 	/*
 		Get volume data
@@ -43,28 +43,8 @@ public:
 
 public slots:
 
-	void enableMip(bool enable)
-	{
-		m_mip = enable;
-		emit redrawAll();
-	}
-
-	void enableHist(bool enable)
-	{
-		m_hist = enable;
-
-		//Change equalizer mapping
-		if (m_hist)
-		{
-			m_eqMapping = m_histogramEq.mapping();
-		}
-		else
-		{
-			m_eqMapping = m_simpleEq.mapping();
-		}
-
-		emit redrawAll();
-	}
+	void enableMip(bool enable);
+	void enableHist(bool enable);
 
 signals:
 
