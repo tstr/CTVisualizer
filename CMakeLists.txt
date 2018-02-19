@@ -57,6 +57,8 @@ set(sources
     src/Effect.h
 	src/HistogramEqualization.h
 	src/HistogramEqualization.cpp
+	src/Camera.h
+	src/RayTracing.h
 	src/util/CountingIterator.h
 	src/util/LabelledSlider.h
 	src/util/LabelledSlider.cpp
@@ -152,9 +154,9 @@ if (WIN32)
 			COMMAND ${CMAKE_COMMAND} -E remove_directory "${CMAKE_CURRENT_BINARY_DIR}/windeployqt"
 			COMMAND set PATH=%PATH%$<SEMICOLON>${qt5_install_prefix}/bin
 			COMMAND Qt5::windeployqt
-					#$<$<CONFIG:Debug>:"--debug">
-					#$<$<CONFIG:Release>:"--release">
-					--release
+					$<$<CONFIG:Debug>:"--debug">
+					$<$<CONFIG:Release>:"--release">
+					#--release
 					--no-translations
 					--no-system-d3d-compiler
 					--dir "${CMAKE_CURRENT_BINARY_DIR}/windeployqt"

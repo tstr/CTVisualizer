@@ -124,6 +124,15 @@ QWidget* MainWindow::createWidgets()
 	m_ySlider->setSliderPosition((int)m_render.volume()->sizeY() / 2);
 	m_zSlider->setSliderPosition((int)m_render.volume()->sizeZ() / 2);
 
+	
+	//3D
+	m_3DTarget = QImage(256, 256, QImage::Format_Grayscale8);
+	m_3DView = new QLabel(this);
+	m_3DView->setText("test label");
+	m_render.draw3D(m_3DTarget, QVector3D(0.0f, 0.0f, 1.0f));
+	m_3DView->setPixmap(QPixmap::fromImage(m_3DTarget));
+	layout->addWidget(m_3DView);
+
 	//Central widget
 	QWidget* center = new QWidget(this);
 	center->setLayout(layout);
@@ -149,6 +158,13 @@ QWidget* MainWindow::createImageArea()
 
 	QScrollArea* scrollArea = new QScrollArea(this);
 	scrollArea->setLayout(imageLayout);
+
+	//Set background colour
+	QPalette pal(palette());
+	pal.setColor(QPalette::Background, Qt::gray);
+	scrollArea->setAutoFillBackground(true);
+	scrollArea->setPalette(pal);
+
 	return scrollArea;
 }
 

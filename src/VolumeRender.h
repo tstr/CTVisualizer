@@ -34,6 +34,11 @@ public:
 	void drawSubimage(QImage& target, quint32 index, VolumeAxis axis);
 
 	/*
+		Draw a 3D view
+	*/
+	void draw3D(QImage& target, const QVector3D& viewdir);
+
+	/*
 		Get volume data
 	*/
 	const Volume* volume() const { return &m_volume; }

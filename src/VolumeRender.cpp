@@ -98,3 +98,21 @@ void VolumeRender::drawSubimage(QImage& target, quint32 index, VolumeAxis axis)
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void VolumeRender::draw3D(QImage& target, const QVector3D& viewdir)
+{
+	Effect::apply(target, [=](UV coord) {
+
+		float x = coord.u - 0.5f;
+		float y = coord.v - 0.5f;
+
+		if ((x*x + y*y) < 0.1f)
+		{
+			return 255;
+		}
+
+		return 0;
+	});
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

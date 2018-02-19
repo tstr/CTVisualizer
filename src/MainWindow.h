@@ -71,4 +71,8 @@ private:
 	QLabel* m_topImage;
 	QLabel* m_sideImage;
 	QLabel* m_frontImage;
+	
+	//3D
+	QImage m_3DTarget;
+	QLabel* m_3DView;
 };
