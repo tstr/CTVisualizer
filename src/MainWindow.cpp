@@ -38,22 +38,25 @@ MainWindow::~MainWindow()
 void MainWindow::updateImageFront(int value)
 {
 	//Draw X
-	m_render.drawSubimage(m_xTarget, value, VolumeAxis::XAxis);
-	m_frontImage->setPixmap(QPixmap::fromImage(m_xTarget));
+	m_frontImage->setPixmap(
+		m_render.drawSubimage(m_yscaled, m_zscaled, value, VolumeAxis::XAxis)
+	);
 }
 
 void MainWindow::updateImageSide(int value)
 {
 	//Draw Y
-	m_render.drawSubimage(m_yTarget, value, VolumeAxis::YAxis);
-	m_sideImage->setPixmap(QPixmap::fromImage(m_yTarget));
+	m_sideImage->setPixmap(
+		m_render.drawSubimage(m_xscaled, m_zscaled, value, VolumeAxis::YAxis)
+	);
 }
 
 void MainWindow::updateImageTop(int value)
 {
 	//Draw Z
-	m_render.drawSubimage(m_zTarget, value, VolumeAxis::ZAxis);
-	m_topImage->setPixmap(QPixmap::fromImage(m_zTarget));
+	m_topImage->setPixmap(
+		m_render.drawSubimage(m_xscaled, m_yscaled, value, VolumeAxis::ZAxis)
+	);
 }
 
 void MainWindow::scaleImages(int value)
@@ -78,14 +81,9 @@ void MainWindow::resizeTargets(float scaleFactor)
 	scaleFactor = std::max(scaleFactor, 0.0f);
 
 	const Volume* v = m_render.volume();
-	const auto xscaled = (Volume::SizeType)(scaleFactor * v->sizeX() * v->scaleX());
-	const auto yscaled = (Volume::SizeType)(scaleFactor * v->sizeY() * v->scaleY());
-	const auto zscaled = (Volume::SizeType)(scaleFactor * v->sizeZ() * v->scaleZ());
-
-	//Scale target images
-	m_xTarget = QImage(yscaled, zscaled, QImage::Format_Grayscale8);
-	m_yTarget = QImage(xscaled, zscaled, QImage::Format_Grayscale8);
-	m_zTarget = QImage(xscaled, yscaled, QImage::Format_Grayscale8);
+	m_xscaled = (Volume::SizeType)(scaleFactor * v->sizeX() * v->scaleX());
+	m_yscaled = (Volume::SizeType)(scaleFactor * v->sizeY() * v->scaleY());
+	m_zscaled = (Volume::SizeType)(scaleFactor * v->sizeZ() * v->scaleZ());
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -126,11 +124,11 @@ QWidget* MainWindow::createWidgets()
 
 	
 	//3D
-	m_3DTarget = QImage(256, 256, QImage::Format_Grayscale8);
 	m_3DView = new QLabel(this);
 	m_3DView->setText("test label");
-	m_render.draw3D(m_3DTarget, QVector3D(0.0f, 0.0f, 1.0f));
-	m_3DView->setPixmap(QPixmap::fromImage(m_3DTarget));
+	m_3DView->setPixmap(
+		m_render.draw3D(256, 256, QVector3D(0.0f, 0.0f, 1.0f))
+	);
 	layout->addWidget(m_3DView);
 
 	//Central widget

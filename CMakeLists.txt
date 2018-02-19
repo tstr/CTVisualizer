@@ -54,7 +54,7 @@ set(sources
 	src/VolumeSubimage.cpp
 	src/VolumeSubimageRange.h
 	src/Samplers.h
-    src/Effect.h
+    src/PixmapDrawer.h
 	src/HistogramEqualization.h
 	src/HistogramEqualization.cpp
 	src/Camera.h
@@ -186,7 +186,7 @@ if (WIN32)
 	)
 		add_custom_command(
 			TARGET Application POST_BUILD
-			COMMENT "Copying Qt libraries..."
+			COMMENT "Copying ${_target}"
 			COMMAND ${CMAKE_COMMAND} -E copy_if_different
 				$<TARGET_FILE:${_target}>
 				$<TARGET_FILE_DIR:Application>

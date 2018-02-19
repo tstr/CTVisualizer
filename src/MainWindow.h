@@ -48,10 +48,10 @@ private:
 	//Volume viewer
 	VolumeRender m_render;
 
-	//Image targets
-	QImage m_xTarget;
-	QImage m_yTarget;
-	QImage m_zTarget;
+	//Scaled volume dimensions
+	Volume::SizeType m_xscaled;
+	Volume::SizeType m_yscaled;
+	Volume::SizeType m_zscaled;
 
 	//front-back view
 	LabelledSlider* m_zSlider;
@@ -73,6 +73,5 @@ private:
 	QLabel* m_frontImage;
 	
 	//3D
-	QImage m_3DTarget;
 	QLabel* m_3DView;
 };

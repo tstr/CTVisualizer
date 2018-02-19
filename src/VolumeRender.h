@@ -31,12 +31,12 @@ public:
 	/*
 		Draw a single subimage
 	*/
-	void drawSubimage(QImage& target, quint32 index, VolumeAxis axis);
+	QPixmap drawSubimage(quint32 width, quint32 height, quint32 index, VolumeAxis axis);
 
 	/*
 		Draw a 3D view
 	*/
-	void draw3D(QImage& target, const QVector3D& viewdir);
+	QPixmap draw3D(quint32 width, quint32 height, const QVector3D& viewdir);
 
 	/*
 		Get volume data

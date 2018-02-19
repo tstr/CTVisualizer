@@ -9,7 +9,7 @@
 #include "VolumeRender.h"
 #include "VolumeSubimageRange.h"
 #include "Samplers.h"
-#include "Effect.h"
+#include "PixmapDrawer.h"
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -56,12 +56,8 @@ void VolumeRender::enableHist(bool enable)
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void VolumeRender::drawSubimage(QImage& target, quint32 index, VolumeAxis axis)
+QPixmap VolumeRender::drawSubimage(quint32 w, quint32 h, quint32 index, VolumeAxis axis)
 {
-	//Debug time
-	QElapsedTimer t;
-	t.start();
-
 	//If maximum intensity projection enabled
 	if (m_mip)
 	{
@@ -69,7 +65,7 @@ void VolumeRender::drawSubimage(QImage& target, quint32 index, VolumeAxis axis)
 		VolumeSubimageRange range(&m_volume, axis);
 
 		//Draw using MIP
-		Effect::apply(target, [&](UV coords)
+		return PixmapDrawer::dispatch(w, h, [&](UV coords)
 		{
 			Volume::ElementType max = std::numeric_limits<Volume::ElementType>::min();
 			
@@ -88,20 +84,17 @@ void VolumeRender::drawSubimage(QImage& target, quint32 index, VolumeAxis axis)
 	{
 		VolumeSubimage view(&m_volume, index, axis);
 
-		Effect::apply(target, [&](UV coords) {
+		return PixmapDrawer::dispatch(w, h, [&](UV coords) {
 			return this->normalize(BilinearSampler::sample(view, coords));
 		});
 	}
-
-	//Print debug
-	qDebug() << "axis:" << axis << " -- elapsed: " << t.elapsed() << "ms";
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void VolumeRender::draw3D(QImage& target, const QVector3D& viewdir)
+QPixmap VolumeRender::draw3D(quint32 w, quint32 h, const QVector3D& viewdir)
 {
-	Effect::apply(target, [=](UV coord) {
+	return PixmapDrawer::dispatch(w, h, [=](UV coord) {
 
 		float x = coord.u - 0.5f;
 		float y = coord.v - 0.5f;
