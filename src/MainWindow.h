@@ -5,6 +5,7 @@
 
 #include <QMainWindow>
 
+#include "Camera.h"
 #include "VolumeRender.h"
 
 class QLabel;
@@ -30,6 +31,8 @@ private slots:
 	void updateImageTop(int value);
 	void scaleImages(int value);
 
+	void updateCamera(const QMatrix4x4& matrix);
+
 	/*
 		Displayed images
 	*/
@@ -47,6 +50,8 @@ private:
 
 	//Volume viewer
 	VolumeRender m_render;
+	//3D camera
+	ArcballCamera m_camera;
 
 	//Scaled volume dimensions
 	Volume::SizeType m_xscaled;
@@ -61,6 +66,9 @@ private:
 	LabelledSlider* m_xSlider;
 	//image scale
 	LabelledSlider* m_scaleSlider;
+	
+	LabelledSlider* m_rotationXSlider;
+	LabelledSlider* m_rotationYSlider;
 
 	//histogram equalization toggle
 	QCheckBox* m_heToggle;

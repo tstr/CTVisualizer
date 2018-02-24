@@ -48,7 +48,7 @@ public:
 		Dimensions() {}
 		Dimensions(const Dimensions& other) = default;
 		Dimensions(SizeType _sizeX, SizeType _sizeY, SizeType _sizeZ, SizeType _scaleX, SizeType _scaleY, SizeType _scaleZ) :
-			sizeX(_sizeX), sizeY(_sizeY), sizeZ(sizeZ),
+			sizeX(_sizeX), sizeY(_sizeY), sizeZ(_sizeZ),
 			scaleX(_scaleX), scaleY(_scaleY), scaleZ(_scaleZ)
 		{}
 	};

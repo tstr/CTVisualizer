@@ -92,19 +92,35 @@ QPixmap VolumeRender::drawSubimage(quint32 w, quint32 h, quint32 index, VolumeAx
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-QPixmap VolumeRender::draw3D(quint32 w, quint32 h, const QVector3D& viewdir)
+QPixmap VolumeRender::draw3D(quint32 w, quint32 h, const QMatrix4x4& viewProj)
 {
-	return PixmapDrawer::dispatch(w, h, [=](UV coord) {
+	return PixmapDrawer::dispatch(w, h, [&](UV coord) {
+		const QVector3D offset(0.5f, 0.5f, 0.5f);
 
-		float x = coord.u - 0.5f;
-		float y = coord.v - 0.5f;
+		QVector4D origin(coord.u, coord.v, 0.0f, 1.0f);
+		origin -= offset;
+		origin = viewProj * origin;
+		origin += offset;
+		
+		QVector3D dir(0, 0, 1.0f);
+		dir = viewProj * dir;
 
-		if ((x*x + y*y) < 0.1f)
+		Volume::ElementType max = std::numeric_limits<Volume::ElementType>::min();
+
+		const size_t numSteps = 100;
+
+		for (size_t i = 0; i < numSteps; i++)
 		{
-			return 255;
+			const float step = (float)i / numSteps;
+
+			QVector4D cur = origin + (step * dir);
+
+			const auto value = TrilinearSampler::sample(m_volume, UVW(cur.toVector3D()));
+
+			max = std::max(max, value);
 		}
 
-		return 0;
+		return normalize(max);
 	});
 }
 

@@ -4,6 +4,9 @@
 
 #pragma once
 
+#include <QVector2D>
+#include <QVector3D>
+
 #include "Volume.h"
 #include "VolumeSubimage.h"
 
@@ -16,6 +19,10 @@ struct UV
 {
 	float u;
 	float v;
+
+	UV(const QVector2D& coords) :
+		u(coords.x()), v(coords.y())
+	{}
 
 	UV(float _u = 0.0f, float _v = 0.0f) :
 		u(_u), v(_v)
@@ -31,10 +38,36 @@ struct UVW
 	float v;
 	float w;
 
+	UVW(const QVector3D& coords) :
+		u(coords.x()), v(coords.y()), w(coords.z())
+	{}
+	
 	UVW(float _u = 0.0f, float _v = 0.0f, float _w = 0.0f) :
 		u(_u), v(_v), w(_w)
 	{}
 };
+
+/*
+	Helper functions
+*/
+
+//Clamp texture coordinate value u
+Volume::IndexType clamp(float u, Volume::SizeType x)
+{
+	return std::max(
+		0u,
+		std::min(
+			x - 1,
+			(Volume::IndexType)(u * (float)x)
+		)
+	);
+}
+
+//Linear interpolate between two values
+static Volume::ElementType lerp(Volume::ElementType v0, Volume::ElementType v1, float step)
+{
+	return (Volume::ElementType)(v0 + (((float)v1 - v0) * step));
+}
 
 /*
 	Nearest-Neighbour sampler
@@ -43,10 +76,19 @@ class BasicSampler
 {
 public:
 
+	static Volume::ElementType sample(const Volume& volume, const UVW& coords)
+	{
+		const auto _u = clamp(coords.u, volume.sizeX());
+		const auto _v = clamp(coords.v, volume.sizeY());
+		const auto _w = clamp(coords.w, volume.sizeZ());
+
+		return volume.at(_u, _v, _w);
+	}
+
 	static Volume::ElementType sample(const VolumeSubimage& view, const UV& coords)
 	{
-		const auto _u = (Volume::IndexType)(coords.u * (float)view.width()) % view.width();
-		const auto _v = (Volume::IndexType)(coords.v * (float)view.height()) % view.height();
+		const auto _u = clamp(coords.u, view.width());
+		const auto _v = clamp(coords.v, view.height());
 
 		return view.at(_u, _v);
 	}
@@ -58,12 +100,6 @@ public:
 class BilinearSampler
 {
 public:
-
-	//Linear interpolate between two values
-	static Volume::ElementType lerp(Volume::ElementType v0, Volume::ElementType v1, float step)
-	{
-		return (Volume::ElementType)(v0 + (((float)v1 - v0) * step));
-	}
 
 	static Volume::ElementType sample(const VolumeSubimage& view, const UV& coords)
 	{
@@ -208,6 +244,50 @@ public:
 
 	static Volume::ElementType sample(const Volume& volume, const UVW& coords)
 	{
+		float x = clamp(coords.u, volume.sizeX());
+		float y = clamp(coords.v, volume.sizeY());
+		float z = clamp(coords.w, volume.sizeZ());
 
+		//Calculate nearest 4 neighbouring texel coordinates
+		float xmin = floorf(x);
+		float xmax = ceilf(x);
+		float ymin = floorf(y);
+		float ymax = ceilf(y);
+		float zmin = floorf(z);
+		float zmax = ceilf(z);
+
+		const float bias = std::numeric_limits<float>::epsilon();
+
+		//Compute texcoord gradient - bias prevents divide by zero errors
+		const float xgradient = (x - xmin) / (bias + (xmax - xmin));
+		const float ygradient = (y - ymin) / (bias + (ymax - ymin));
+		const float zgradient = (z - zmin) / (bias + (zmax - zmin));
+
+		//Grab 2x2x2 texel values
+		const Volume::ElementType v[2][2][2] =
+		{
+			{
+				{ volume.at(xmin, ymin, zmin), volume.at(xmax, ymin, zmin) },
+				{ volume.at(xmin, ymax, zmin), volume.at(xmax, ymax, zmin) }
+			},
+			{
+				{ volume.at(xmin, ymin, zmax), volume.at(xmax, ymin, zmax) },
+				{ volume.at(xmin, ymax, zmax), volume.at(xmax, ymax, zmax) }
+			}
+		};
+
+		return lerp(
+			lerp(
+				lerp(v[0][0][0], v[0][0][1], xgradient),
+				lerp(v[0][1][0], v[0][1][1], xgradient),
+				ygradient
+			),
+			lerp(
+				lerp(v[1][0][0], v[1][0][1], xgradient),
+				lerp(v[1][1][0], v[1][1][1], xgradient),
+				ygradient
+			),
+			zgradient
+		);
 	}
 };

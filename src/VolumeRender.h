@@ -6,9 +6,9 @@
 
 #pragma once
 
-#include <QObject>
 #include <QImage>
 #include <QPixmap>
+#include <QMatrix4x4>
 
 #include "Volume.h"
 #include "VolumeSubimage.h"
@@ -36,7 +36,7 @@ public:
 	/*
 		Draw a 3D view
 	*/
-	QPixmap draw3D(quint32 width, quint32 height, const QVector3D& viewdir);
+	QPixmap draw3D(quint32 width, quint32 height, const QMatrix4x4& viewProj);
 
 	/*
 		Get volume data

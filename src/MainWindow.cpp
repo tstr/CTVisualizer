@@ -86,6 +86,13 @@ void MainWindow::resizeTargets(float scaleFactor)
 	m_zscaled = (Volume::SizeType)(scaleFactor * v->sizeZ() * v->scaleZ());
 }
 
+void MainWindow::updateCamera(const QMatrix4x4& matrix)
+{
+	m_3DView->setPixmap(
+		m_render.draw3D(256, 256, matrix)
+	);
+}
+
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 QWidget* MainWindow::createWidgets()
@@ -121,15 +128,21 @@ QWidget* MainWindow::createWidgets()
 	m_xSlider->setSliderPosition((int)m_render.volume()->sizeX() / 2);
 	m_ySlider->setSliderPosition((int)m_render.volume()->sizeY() / 2);
 	m_zSlider->setSliderPosition((int)m_render.volume()->sizeZ() / 2);
-
 	
 	//3D
 	m_3DView = new QLabel(this);
 	m_3DView->setText("test label");
 	m_3DView->setPixmap(
-		m_render.draw3D(256, 256, QVector3D(0.0f, 0.0f, 1.0f))
+		m_render.draw3D(256, 256, QMatrix())
 	);
 	layout->addWidget(m_3DView);
+
+	m_rotationXSlider->setSliderPosition(0);
+	m_rotationYSlider->setSliderPosition(0);
+
+	connect(m_rotationXSlider, &LabelledSlider::valueChanged, &m_camera, &ArcballCamera::setRotationX);
+	connect(m_rotationYSlider, &LabelledSlider::valueChanged, &m_camera, &ArcballCamera::setRotationY);
+	connect(&m_camera, &ArcballCamera::cameraUpdated, this, &MainWindow::updateCamera);
 
 	//Central widget
 	QWidget* center = new QWidget(this);
@@ -186,6 +199,11 @@ QWidget* MainWindow::createControlArea()
 	m_scaleSlider->setRange(IMAGE_SCALE_MIN, IMAGE_SCALE_MAX);
 	m_scaleSlider->setValue(100);
 
+	m_rotationXSlider = new LabelledSlider(this);
+	m_rotationXSlider->setRange(0, 360);
+	m_rotationYSlider = new LabelledSlider(this);
+	m_rotationYSlider->setRange(0, 360);
+
 	m_mipToggle = new QCheckBox(QStringLiteral("Maximum Intensity Projection"), this);
 	m_heToggle = new QCheckBox(QStringLiteral("Histogram Equalization"), this);
 
@@ -196,6 +214,9 @@ QWidget* MainWindow::createControlArea()
 	ctrlLayout->addRow(QStringLiteral("Scale(%)"), m_scaleSlider);
 	ctrlLayout->addWidget(m_mipToggle);
 	ctrlLayout->addWidget(m_heToggle);
+
+	ctrlLayout->addRow(QStringLiteral("X rotation:"), m_rotationXSlider);
+	ctrlLayout->addRow(QStringLiteral("Y rotation:"), m_rotationYSlider);
 
 	QGroupBox* ctrlGroup = new QGroupBox(QStringLiteral("Options"), this);
 	ctrlGroup->setLayout(ctrlLayout);
