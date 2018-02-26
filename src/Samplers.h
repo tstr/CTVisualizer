@@ -10,6 +10,8 @@
 #include "Volume.h"
 #include "VolumeSubimage.h"
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 /*
 	UV coordinates in 2D
 
@@ -27,6 +29,8 @@ struct UV
 	UV(float _u = 0.0f, float _v = 0.0f) :
 		u(_u), v(_v)
 	{}
+
+	QVector2D toVector() const { return QVector2D(u, v); }
 };
 
 /*
@@ -45,8 +49,11 @@ struct UVW
 	UVW(float _u = 0.0f, float _v = 0.0f, float _w = 0.0f) :
 		u(_u), v(_v), w(_w)
 	{}
+
+	QVector3D toVector() const { return QVector3D(u, v, w); }
 };
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /*
 	Helper functions
 */
@@ -69,6 +76,8 @@ static Volume::ElementType lerp(Volume::ElementType v0, Volume::ElementType v1, 
 	return (Volume::ElementType)(v0 + (((float)v1 - v0) * step));
 }
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 /*
 	Nearest-Neighbour sampler
 */
@@ -78,19 +87,37 @@ public:
 
 	static Volume::ElementType sample(const Volume& volume, const UVW& coords)
 	{
-		const auto _u = clamp(coords.u, volume.sizeX());
-		const auto _v = clamp(coords.v, volume.sizeY());
-		const auto _w = clamp(coords.w, volume.sizeZ());
+		const auto x = (Volume::IndexType)(coords.u * volume.sizeX());
+		const auto y = (Volume::IndexType)(coords.v * volume.sizeY());
+		const auto z = (Volume::IndexType)(coords.w * volume.sizeZ());
 
-		return volume.at(_u, _v, _w);
+		const auto minval = std::numeric_limits<Volume::ElementType>::min();
+
+		//Check bounds
+		if (x < 0.0f || x >= volume.sizeX())
+			return minval;
+		if (y < 0.0f || y >= volume.sizeY())
+			return minval;
+		if (z < 0.0f || z >= volume.sizeZ())
+			return minval;
+
+		return volume.at(x, y, z);
 	}
 
 	static Volume::ElementType sample(const VolumeSubimage& view, const UV& coords)
 	{
-		const auto _u = clamp(coords.u, view.width());
-		const auto _v = clamp(coords.v, view.height());
+		const auto x = (Volume::IndexType)(coords.u * view.width());
+		const auto y = (Volume::IndexType)(coords.v * view.height());
 
-		return view.at(_u, _v);
+		const auto minval = std::numeric_limits<Volume::ElementType>::min();
+
+		//Check bounds
+		if (x < 0.0f || x >= view.width())
+			return minval;
+		if (y < 0.0f || y >= view.height())
+			return minval;
+
+		return view.at(x, y);
 	}
 };
 
@@ -122,12 +149,13 @@ public:
 		float ymin = floorf(y);
 		float ymax = ceilf(y);
 
-		//Clamp coordinates
-		xmin = std::max(xmin, 0.0f);
-		xmax = std::min(xmax, (float)view.width() - 1);
-		ymin = std::max(ymin, 0.0f);
-		ymax = std::min(ymax, (float)view.height() - 1);
-		
+		const auto minval = std::numeric_limits<Volume::ElementType>::min();
+		//Check bounds
+		if (xmin < 0.0f || xmax >= view.width())
+			return minval;
+		if (ymin < 0.0f || ymax >= view.height())
+			return minval;
+
 		const float bias = std::numeric_limits<float>::epsilon();
 
 		//Compute texcoord gradient - bias prevents divide by zero errors
@@ -193,6 +221,13 @@ public:
 		float ymin = floorf(y);
 		float ymax = ceilf(y);
 
+		const auto minval = std::numeric_limits<Volume::ElementType>::min();
+		//Check bounds
+		if (xmin < 0.0f || xmax >= view.width())
+			return minval;
+		if (ymin < 0.0f || ymax >= view.height())
+			return minval;
+
 		const float bias = std::numeric_limits<float>::epsilon();
 
 		//Compute texcoord gradient - bias prevents divide by zero errors
@@ -244,17 +279,28 @@ public:
 
 	static Volume::ElementType sample(const Volume& volume, const UVW& coords)
 	{
-		float x = clamp(coords.u, volume.sizeX());
-		float y = clamp(coords.v, volume.sizeY());
-		float z = clamp(coords.w, volume.sizeZ());
+		const float x = coords.u * volume.sizeX();
+		const float y = coords.v * volume.sizeY();
+		const float z = coords.w * volume.sizeZ();
 
 		//Calculate nearest 4 neighbouring texel coordinates
-		float xmin = floorf(x);
-		float xmax = ceilf(x);
-		float ymin = floorf(y);
-		float ymax = ceilf(y);
-		float zmin = floorf(z);
-		float zmax = ceilf(z);
+		const float xmin = floorf(x);
+		const float xmax = ceilf(x);
+		const float ymin = floorf(y);
+		const float ymax = ceilf(y);
+		const float zmin = floorf(z);
+		const float zmax = ceilf(z);
+
+
+		const auto minval = std::numeric_limits<Volume::ElementType>::min();
+
+		//Check bounds
+		if (xmin < 0.0f || xmax >= volume.sizeX())
+			return minval;
+		if (ymin < 0.0f || ymax >= volume.sizeY())
+			return minval;
+		if (zmin < 0.0f || zmax >= volume.sizeZ())
+			return minval;
 
 		const float bias = std::numeric_limits<float>::epsilon();
 
@@ -291,3 +337,5 @@ public:
 		);
 	}
 };
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
