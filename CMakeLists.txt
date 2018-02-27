@@ -44,8 +44,13 @@ endif()
 set(sources
 	config.ini
 	src/Main.cpp
-	src/MainWindow.h
-	src/MainWindow.cpp
+
+	src/gui/MainWindow.h
+	src/gui/MainWindow.cpp
+	src/gui/SubimageView.h
+	src/gui/SubimageView.cpp
+	src/gui/LabelledSlider.h
+	src/gui/LabelledSlider.cpp
 	
 	src/gfx/Volume.h
 	src/gfx/Volume.cpp
@@ -59,11 +64,9 @@ set(sources
 	src/gfx/HistogramEqualization.h
 	src/gfx/HistogramEqualization.cpp
 	src/gfx/Camera.h
-	
+
 	src/util/ImageBuffer.h
 	src/util/CountingIterator.h
-	src/util/LabelledSlider.h
-	src/util/LabelledSlider.cpp
 )
 
 add_executable(Application WIN32

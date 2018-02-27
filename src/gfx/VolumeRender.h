@@ -67,11 +67,11 @@ private:
 	//Temporary image buffer for performing drawing operations on
 	ImageBuffer m_targetBuffer;
 
-	//Equalizers
-	HistogramEqualizer m_histogramEq;
-	SimpleEqualizer m_simpleEq;
-	//Current equalizer mapping table
-	const quint8* m_eqMapping;
+	//Colour mapping tables
+	HistogramEqualizer m_histogramMapper;
+	SimpleEqualizer m_simpleMapper;
+	//Current colour mapping table
+	const MappingTable* m_mapper;
 
 	//Histogram equalization
 	bool m_hist = true;

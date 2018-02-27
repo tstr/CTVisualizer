@@ -149,12 +149,11 @@ public:
 		float ymin = floorf(y);
 		float ymax = ceilf(y);
 
-		const auto minval = std::numeric_limits<Volume::ElementType>::min();
 		//Check bounds
 		if (xmin < 0.0f || xmax >= view.width())
-			return minval;
+			return BasicSampler::sample(view, coords);
 		if (ymin < 0.0f || ymax >= view.height())
-			return minval;
+			return BasicSampler::sample(view, coords);
 
 		const float bias = std::numeric_limits<float>::epsilon();
 
@@ -221,12 +220,11 @@ public:
 		float ymin = floorf(y);
 		float ymax = ceilf(y);
 
-		const auto minval = std::numeric_limits<Volume::ElementType>::min();
 		//Check bounds
 		if (xmin < 0.0f || xmax >= view.width())
-			return minval;
+			return BasicSampler::sample(view, coords);
 		if (ymin < 0.0f || ymax >= view.height())
-			return minval;
+			return BasicSampler::sample(view, coords);
 
 		const float bias = std::numeric_limits<float>::epsilon();
 
@@ -291,16 +289,13 @@ public:
 		const float zmin = floorf(z);
 		const float zmax = ceilf(z);
 
-
-		const auto minval = std::numeric_limits<Volume::ElementType>::min();
-
 		//Check bounds
 		if (xmin < 0.0f || xmax >= volume.sizeX())
-			return minval;
+			return BasicSampler::sample(volume, coords);
 		if (ymin < 0.0f || ymax >= volume.sizeY())
-			return minval;
+			return BasicSampler::sample(volume, coords);
 		if (zmin < 0.0f || zmax >= volume.sizeZ())
-			return minval;
+			return BasicSampler::sample(volume, coords);
 
 		const float bias = std::numeric_limits<float>::epsilon();
 

@@ -4,9 +4,11 @@
 
 #include <QtWidgets>
 
-#include "MainWindow.h"
 #include "gfx/VolumeRender.h"
-#include "util/LabelledSlider.h"
+#include "gui/LabelledSlider.h"
+
+#include "MainWindow.h"
+#include "SubimageView.h"
 
 enum Constants
 {
@@ -24,8 +26,6 @@ MainWindow::MainWindow(Volume& volume, QWidget *parent) :
 	QMainWindow(parent),
 	m_render(volume)
 {
-	resizeTargets(1.0f);
-
 	setWindowTitle(QStringLiteral("title"));
 	resize(QSize(1280, 720));
 	setCentralWidget(createWidgets());
@@ -40,55 +40,16 @@ MainWindow::~MainWindow()
 //	Image drawing
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void MainWindow::updateImageFront(int value)
-{
-	//Draw X
-	m_frontImage->setPixmap(
-		m_render.drawSubimage(m_yscaled, m_zscaled, value, VolumeAxis::XAxis)
-	);
-}
-
-void MainWindow::updateImageSide(int value)
-{
-	//Draw Y
-	m_sideImage->setPixmap(
-		m_render.drawSubimage(m_xscaled, m_zscaled, value, VolumeAxis::YAxis)
-	);
-}
-
-void MainWindow::updateImageTop(int value)
-{
-	//Draw Z
-	m_topImage->setPixmap(
-		m_render.drawSubimage(m_xscaled, m_yscaled, value, VolumeAxis::ZAxis)
-	);
-}
-
 void MainWindow::scaleImages(int value)
 {
 	//Scale percentage value to normalized value
-	float scaleFactor = (float)value / 100.0f;
+	float scaleFactor = std::max((float)value / 100.0f, 0.0f);
 
-	resizeTargets(scaleFactor);
+	m_xSubimage->setScale(scaleFactor);
+	m_ySubimage->setScale(scaleFactor);
+	m_zSubimage->setScale(scaleFactor);
 
-	redrawAll();
-}
-
-void MainWindow::redrawAll()
-{
-	updateImageFront(m_xSlider->value());
-	updateImageSide(m_ySlider->value());
-	updateImageTop(m_zSlider->value());
-}
-
-void MainWindow::resizeTargets(float scaleFactor)
-{
-	scaleFactor = std::max(scaleFactor, 0.0f);
-
-	const Volume* v = m_render.volume();
-	m_xscaled = (Volume::SizeType)(scaleFactor * v->sizeX() * v->scaleX());
-	m_yscaled = (Volume::SizeType)(scaleFactor * v->sizeY() * v->scaleY());
-	m_zscaled = (Volume::SizeType)(scaleFactor * v->sizeZ() * v->scaleZ());
+	m_render.redrawAll();
 }
 
 void MainWindow::updateCamera(const QMatrix4x4& matrix)
@@ -114,9 +75,9 @@ QWidget* MainWindow::createWidgets()
 	*/
 
 	//Connect sliders
-	connect(m_xSlider, &QSlider::valueChanged, this, &MainWindow::updateImageFront);
-	connect(m_ySlider, &QSlider::valueChanged, this, &MainWindow::updateImageSide);
-	connect(m_zSlider, &QSlider::valueChanged, this, &MainWindow::updateImageTop);
+	connect(m_xSlider, &QSlider::valueChanged, m_xSubimage, &SubimageView::setIndex);
+	connect(m_ySlider, &QSlider::valueChanged, m_ySubimage, &SubimageView::setIndex);
+	connect(m_zSlider, &QSlider::valueChanged, m_zSubimage, &SubimageView::setIndex);
 
 	connect(m_scaleSlider, &QSlider::valueChanged, this, &MainWindow::scaleImages);
 
@@ -129,8 +90,10 @@ QWidget* MainWindow::createWidgets()
 	connect(m_mipToggle, &QCheckBox::toggled, m_ySlider, &QSlider::setDisabled);
 	connect(m_mipToggle, &QCheckBox::toggled, m_zSlider, &QSlider::setDisabled);
 
-	//Connect redraw signal
-	connect(&m_render, &VolumeRender::redrawAll, this, &MainWindow::redrawAll);
+	//Connect redraw signal - subimage widgets are redrawn when renderer is updated
+	connect(&m_render, &VolumeRender::redrawAll, m_xSubimage, &SubimageView::redraw);
+	connect(&m_render, &VolumeRender::redrawAll, m_ySubimage, &SubimageView::redraw);
+	connect(&m_render, &VolumeRender::redrawAll, m_zSubimage, &SubimageView::redraw);
 
 	m_xSlider->setSliderPosition((int)m_render.volume()->sizeX() / 2);
 	m_ySlider->setSliderPosition((int)m_render.volume()->sizeY() / 2);
@@ -184,18 +147,15 @@ QWidget* MainWindow::create3DArea()
 QWidget* MainWindow::createImageArea()
 {
 	//Images
-	m_topImage = new QLabel(this);
-	m_topImage->setAlignment(Qt::AlignCenter);
-	m_sideImage = new QLabel(this);
-	m_sideImage->setAlignment(Qt::AlignCenter);
-	m_frontImage = new QLabel(this);
-	m_frontImage->setAlignment(Qt::AlignCenter);
+	m_xSubimage = new SubimageView(&m_render, VolumeAxis::XAxis, 0, this);
+	m_ySubimage = new SubimageView(&m_render, VolumeAxis::YAxis, 0, this);
+	m_zSubimage = new SubimageView(&m_render, VolumeAxis::ZAxis, 0, this);
 
 	//Image grid
 	QGridLayout* imageLayout = new QGridLayout(this);
-	imageLayout->addWidget(m_topImage, 0, 0);
-	imageLayout->addWidget(m_sideImage, 0, 1);
-	imageLayout->addWidget(m_frontImage, 1, 0);
+	imageLayout->addWidget(m_zSubimage, 0, 0);
+	imageLayout->addWidget(m_ySubimage, 0, 1);
+	imageLayout->addWidget(m_xSubimage, 1, 0);
 
 	QFrame* area = new QFrame(this);
 	area->setLayout(imageLayout);

@@ -15,8 +15,15 @@
 
 #pragma once
 
-#include <QImage>
+#include <QIODevice>
 #include <QVector>
+
+enum VolumeAxis
+{
+	XAxis,
+	YAxis,
+	ZAxis
+};
 
 class Volume
 {
@@ -80,6 +87,38 @@ public:
 	//Z: Voxel factor
 	SizeType scaleZ() const { return m_dim.scaleZ; }
 
+	//Get size of given axis
+	SizeType axisSize(VolumeAxis axis) const
+	{
+		const SizeType sizes[3] =
+		{
+			sizeX(),
+			sizeY(),
+			sizeZ()
+		};
+
+		return sizes[axis];
+	}
+
+	//Get scale of given axis
+	SizeType axisScale(VolumeAxis axis) const
+	{
+		const SizeType scales[3] =
+		{
+			scaleX(),
+			scaleY(),
+			scaleZ()
+		};
+
+		return scales[axis];
+	}
+
+	//Get scaled axis size
+	SizeType axisSizeScaled(VolumeAxis axis) const
+	{
+		return axisScale(axis) * axisSize(axis);
+	}
+
 	/*
 		Access voxel from coordinates
 	*/
@@ -114,10 +153,20 @@ public:
 	Iterator begin() const { return m_data.begin(); }
 	Iterator end() const { return m_data.end(); }
 
+	/*
+		Fetch minimum/maximum values
+	*/
+	ElementType min() const { return m_min; }
+	ElementType max() const { return m_max; }
+
 private:
 
 	//Volume dimension info
 	Dimensions m_dim;
+
+	//Min/Max voxels
+	ElementType m_min;
+	ElementType m_max;
 
 	//Data buffer
 	QVector<ElementType> m_data;

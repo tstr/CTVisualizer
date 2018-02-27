@@ -8,17 +8,14 @@
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-HistogramEqualizer::HistogramEqualizer(const Volume* volume)
+HistogramEqualizer::HistogramEqualizer(const Volume* volume) :
+	MappingTable(volume)
 {
 	Q_ASSERT(volume != nullptr);
 
-	auto minmax = std::minmax_element(volume->begin(), volume->end());
-	m_min = *minmax.first;
-	m_max = *minmax.second;
-
-	const Volume::SizeType levels = (m_max - m_min) + 1;
+	const Volume::SizeType levels = (m_volume->max() - m_volume->min()) + 1;
 	const Volume::SizeType size = volume->sizeY() * volume->sizeX() * volume->sizeZ();
-;
+
 	//Frequency histogram
 	QVector<Volume::SizeType> frequencyHistogram(levels);
 	//Actual mapping table
@@ -29,7 +26,7 @@ HistogramEqualizer::HistogramEqualizer(const Volume* volume)
 	//Compute frequencies of every voxel
 	for (Volume::ElementType value : *volume)
 	{
-		frequencyHistogram[value - m_min]++;
+		frequencyHistogram[value - m_volume->min()]++;
 	}
 
 	//Initial value
@@ -46,23 +43,20 @@ HistogramEqualizer::HistogramEqualizer(const Volume* volume)
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-SimpleEqualizer::SimpleEqualizer(const Volume* volume)
+SimpleEqualizer::SimpleEqualizer(const Volume* volume) :
+	MappingTable(volume)
 {
 	Q_ASSERT(volume != nullptr);
 
-	auto minmax = std::minmax_element(volume->begin(), volume->end());
-	m_min = *minmax.first;
-	m_max = *minmax.second;
-
 	//Value range
-	const Volume::SizeType levels = (m_max - m_min) + 1;
+	const Volume::SizeType levels = (m_volume->max() - m_volume->min()) + 1;
 
 	//Build mapping table
 	m_mapping.resize(levels);
 
 	for (Volume::SizeType i = 0; i < levels; i++)
 	{
-		m_mapping[i] = (quint8)(255.0f * (float)i / (m_max - m_min));
+		m_mapping[i] = (quint8)(255.0f * (float)i / (levels - 1));
 	}
 }
 

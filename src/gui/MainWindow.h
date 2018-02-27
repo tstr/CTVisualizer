@@ -11,6 +11,7 @@
 class QLabel;
 class QCheckBox;
 class LabelledSlider;
+class SubimageView;
 
 class MainWindow : public QMainWindow
 {
@@ -26,22 +27,10 @@ private slots:
 	/*
 		Update image views
 	*/
-	void updateImageSide(int value);
-	void updateImageFront(int value);
-	void updateImageTop(int value);
 	void scaleImages(int value);
-
 	void updateCamera(const QMatrix4x4& matrix);
 
-	/*
-		Displayed images
-	*/
-	void redrawAll();
-
 private:
-
-	//Resizes targets
-	void resizeTargets(float scaleFactor);
 
 	//Create gui widgets
 	QWidget* createWidgets();
@@ -54,17 +43,18 @@ private:
 	//3D camera
 	ArcballCamera m_camera;
 
-	//Scaled volume dimensions
-	Volume::SizeType m_xscaled;
-	Volume::SizeType m_yscaled;
-	Volume::SizeType m_zscaled;
-
+	//View sliders
 	LabelledSlider* m_zSlider;
 	LabelledSlider* m_ySlider;
 	LabelledSlider* m_xSlider;
-	//image scale
+	//Image scale slider
 	LabelledSlider* m_scaleSlider;
 	
+	//Subimage view widgets
+	SubimageView* m_xSubimage;
+	SubimageView* m_ySubimage;
+	SubimageView* m_zSubimage;
+
 	LabelledSlider* m_rotationXSlider;
 	LabelledSlider* m_rotationYSlider;
 
@@ -73,11 +63,6 @@ private:
 	//mip toggle
 	QCheckBox* m_mipToggle;
 
-	//Image view widgets
-	QLabel* m_topImage;
-	QLabel* m_sideImage;
-	QLabel* m_frontImage;
-	
 	//3D
 	QLabel* m_3DView;
 };

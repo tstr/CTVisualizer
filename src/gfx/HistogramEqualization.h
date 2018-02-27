@@ -10,10 +10,50 @@
 
 #include "Volume.h"
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+
+/*
+	Volume colour mapping table class
+*/
+class MappingTable
+{
+public:
+
+	/*
+		Construct an empty volume mapper
+	*/
+	MappingTable(const Volume* volume) :
+		m_volume(volume)
+	{}
+
+	/*
+		Map a voxel to an 8bit value
+	*/
+	quint8 normalize(Volume::ElementType value) const
+	{
+		return m_mapping.at(
+			std::min(
+				std::max(
+					value - m_volume->min(),
+					0
+				),
+				m_volume->max() - m_volume->min()
+			)
+		);
+	}
+
+protected:
+
+	const Volume* m_volume;
+	QVector<quint8> m_mapping;
+};
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+
 /*
 	Histogram equalization class
 */
-class HistogramEqualizer
+class HistogramEqualizer : public MappingTable
 {
 public:
 
@@ -21,38 +61,12 @@ public:
 		Construct a histogram equalization table from a given volume
 	*/
 	HistogramEqualizer(const Volume*);
-
-	/*
-		Map a voxel to an 8bit value
-	*/
-	quint8 equalize(Volume::ElementType value) const
-	{
-		return m_mapping.at(value - m_min);
-	}
-
-	/*
-		Get min/max values in volume
-	*/
-	Volume::ElementType max() const { return m_max; }
-	Volume::ElementType min() const { return m_min; }
-
-	/*
-		Get mapping table
-	*/
-	const quint8* mapping() const { return m_mapping.data(); }
-
-private:
-
-	Volume::ElementType m_max;
-	Volume::ElementType m_min;
-
-	QVector<quint8> m_mapping;
 };
 
 /*
 	Simple equalizer class
 */
-class SimpleEqualizer
+class SimpleEqualizer : public MappingTable
 {
 public:
 
@@ -60,30 +74,6 @@ public:
 		Construct a simple mapping from a given volume
 	*/
 	SimpleEqualizer(const Volume*);
-
-	/*
-		Map a voxel to an 8bit value
-	*/
-	quint8 equalize(Volume::ElementType value) const
-	{
-		return m_mapping.at(value - m_min);
-	}
-
-	/*
-		Get min/max values in volume
-	*/
-	Volume::ElementType max() const { return m_max; }
-	Volume::ElementType min() const { return m_min; }
-
-	/*
-		Get mapping table
-	*/
-	const quint8* mapping() const { return m_mapping.data(); }
-
-private:
-
-	Volume::ElementType m_max;
-	Volume::ElementType m_min;
-
-	QVector<quint8> m_mapping;
 };
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////

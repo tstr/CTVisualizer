@@ -16,18 +16,18 @@
 VolumeRender::VolumeRender(Volume& volume, QObject* parent) :
 	QObject(parent),
 	m_volume(std::move(volume)),
-	m_histogramEq(&m_volume),
-	m_simpleEq(&m_volume)
+	m_histogramMapper(&m_volume),
+	m_simpleMapper(&m_volume)
 {
 	//Set default colour mapping table
-	m_eqMapping = m_simpleEq.mapping();
+	m_mapper = &m_simpleMapper;
 }
 
 //Converts voxel to greyscale value
 quint8 VolumeRender::normalize(Volume::ElementType value)
 {
 	//Lookup equalized value from current mapping table
-	return m_eqMapping[value - m_histogramEq.min()];
+	return m_mapper->normalize(value);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -42,14 +42,16 @@ void VolumeRender::enableHist(bool enable)
 {
 	m_hist = enable;
 
-	//Change equalizer mapping
+	//Change colour mapping table
 	if (m_hist)
 	{
-		m_eqMapping = m_histogramEq.mapping();
+		//Histogram equalization
+		m_mapper = &m_histogramMapper;
 	}
 	else
 	{
-		m_eqMapping = m_simpleEq.mapping();
+		//Simple normalization
+		m_mapper = &m_simpleMapper;
 	}
 
 	emit redrawAll();
@@ -80,7 +82,7 @@ QPixmap VolumeRender::drawSubimage(quint32 w, quint32 h, quint32 index, VolumeAx
 				max = std::max(max, BilinearSampler::sample(view, coords));
 			}
 
-			return this->normalize(max);
+			return normalize(max);
 		});
 	}
 	//Otherwise just draw a single slice
@@ -89,7 +91,7 @@ QPixmap VolumeRender::drawSubimage(quint32 w, quint32 h, quint32 index, VolumeAx
 		VolumeSubimage view(&m_volume, index, axis);
 
 		return PixmapDrawer::dispatch(m_targetBuffer, [&](UV coords) {
-			return this->normalize(BilinearSampler::sample(view, coords));
+			return normalize(BilinearSampler::sample(view, coords));
 		});
 	}
 }
@@ -127,8 +129,8 @@ QPixmap VolumeRender::draw3D(quint32 w, quint32 h, const QMatrix4x4& viewProj)
 
 			max = std::max(max, value);
 		}
-
-		return normalize(max);
+		
+		return m_simpleMapper.normalize(max);
 	});
 }
 
