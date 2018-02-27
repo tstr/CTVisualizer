@@ -1,5 +1,5 @@
 /*
-	Volume rendering class
+	Render Context class
 
 	Provides functionality for viewing and volume data
 */
@@ -13,6 +13,7 @@
 #include "Volume.h"
 #include "VolumeSubimage.h"
 #include "HistogramEqualization.h"
+#include "util/ImageBuffer.h"
 
 class VolumeRender : public QObject
 {
@@ -62,6 +63,9 @@ private:
 
 	//Volume data
 	Volume m_volume;
+
+	//Temporary image buffer for performing drawing operations on
+	ImageBuffer m_targetBuffer;
 
 	//Equalizers
 	HistogramEqualizer m_histogramEq;

@@ -19,6 +19,7 @@ VolumeRender::VolumeRender(Volume& volume, QObject* parent) :
 	m_histogramEq(&m_volume),
 	m_simpleEq(&m_volume)
 {
+	//Set default colour mapping table
 	m_eqMapping = m_simpleEq.mapping();
 }
 
@@ -58,6 +59,9 @@ void VolumeRender::enableHist(bool enable)
 
 QPixmap VolumeRender::drawSubimage(quint32 w, quint32 h, quint32 index, VolumeAxis axis)
 {
+	//Ensure there is enough room in target buffer
+	m_targetBuffer.realloc(w, h);
+
 	//If maximum intensity projection enabled
 	if (m_mip)
 	{
@@ -65,7 +69,7 @@ QPixmap VolumeRender::drawSubimage(quint32 w, quint32 h, quint32 index, VolumeAx
 		VolumeSubimageRange range(&m_volume, axis);
 
 		//Draw using MIP
-		return PixmapDrawer::dispatch(w, h, [&](UV coords)
+		return PixmapDrawer::dispatch(m_targetBuffer, [&](UV coords)
 		{
 			Volume::ElementType max = std::numeric_limits<Volume::ElementType>::min();
 			
@@ -84,7 +88,7 @@ QPixmap VolumeRender::drawSubimage(quint32 w, quint32 h, quint32 index, VolumeAx
 	{
 		VolumeSubimage view(&m_volume, index, axis);
 
-		return PixmapDrawer::dispatch(w, h, [&](UV coords) {
+		return PixmapDrawer::dispatch(m_targetBuffer, [&](UV coords) {
 			return this->normalize(BilinearSampler::sample(view, coords));
 		});
 	}
@@ -94,7 +98,10 @@ QPixmap VolumeRender::drawSubimage(quint32 w, quint32 h, quint32 index, VolumeAx
 
 QPixmap VolumeRender::draw3D(quint32 w, quint32 h, const QMatrix4x4& viewProj)
 {
-	return PixmapDrawer::dispatch(w, h, [&](UV coord) {
+	//Ensure there is enough room in target buffer
+	m_targetBuffer.realloc(w, h);
+
+	return PixmapDrawer::dispatch(m_targetBuffer, [&](UV coord) {
 
 		const QVector3D offset(0.5f, 0.5f, 0.5f);
 		

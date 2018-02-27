@@ -46,19 +46,21 @@ set(sources
 	src/Main.cpp
 	src/MainWindow.h
 	src/MainWindow.cpp
-	src/Volume.h
-	src/Volume.cpp
-	src/VolumeRender.h
-	src/VolumeRender.cpp
-	src/VolumeSubimage.h
-	src/VolumeSubimage.cpp
-	src/VolumeSubimageRange.h
-	src/Samplers.h
-    src/PixmapDrawer.h
-	src/HistogramEqualization.h
-	src/HistogramEqualization.cpp
-	src/Camera.h
-	src/RayTracing.h
+	
+	src/gfx/Volume.h
+	src/gfx/Volume.cpp
+	src/gfx/VolumeRender.h
+	src/gfx/VolumeRender.cpp
+	src/gfx/VolumeSubimage.h
+	src/gfx/VolumeSubimage.cpp
+	src/gfx/VolumeSubimageRange.h
+	src/gfx/Samplers.h
+    src/gfx/PixmapDrawer.h
+	src/gfx/HistogramEqualization.h
+	src/gfx/HistogramEqualization.cpp
+	src/gfx/Camera.h
+	
+	src/util/ImageBuffer.h
 	src/util/CountingIterator.h
 	src/util/LabelledSlider.h
 	src/util/LabelledSlider.cpp
@@ -66,6 +68,11 @@ set(sources
 
 add_executable(Application WIN32
 	${sources}
+)
+
+target_include_directories(Application
+  PRIVATE
+    src
 )
 
 target_link_libraries(Application

@@ -5,8 +5,8 @@
 
 #include <QMainWindow>
 
-#include "Camera.h"
-#include "VolumeRender.h"
+#include "gfx/Camera.h"
+#include "gfx/VolumeRender.h"
 
 class QLabel;
 class QCheckBox;
@@ -47,6 +47,7 @@ private:
 	QWidget* createWidgets();
 	QWidget* createControlArea();
 	QWidget* createImageArea();
+	QWidget* create3DArea();
 
 	//Volume viewer
 	VolumeRender m_render;
@@ -58,11 +59,8 @@ private:
 	Volume::SizeType m_yscaled;
 	Volume::SizeType m_zscaled;
 
-	//front-back view
 	LabelledSlider* m_zSlider;
-	//top-down view
 	LabelledSlider* m_ySlider;
-	//top-down view
 	LabelledSlider* m_xSlider;
 	//image scale
 	LabelledSlider* m_scaleSlider;

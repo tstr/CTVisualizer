@@ -6,8 +6,8 @@
 #include <QImage>
 #include <QtConcurrentMap>
 
+#include "util/ImageBuffer.h"
 #include "util/CountingIterator.h"
-#include <QDebug>
 
 class PixmapDrawer
 {
@@ -19,31 +19,26 @@ public:
 		Pixel function must take a UV as an argument and return a byte value
 	*/
 	template<typename PixelFunc>
-	static QPixmap dispatch(quint32 width, quint32 height, const PixelFunc& pixel)
+	static QPixmap dispatch(ImageBuffer& target, const PixelFunc& pixel)
 	{
-		QImage target(width, height, QImage::Format_Grayscale8);
-
 		//Per-pixel procedure
 		auto proc = [&](size_t n) {
 
-			const size_t i = n % width;
-			const size_t j = n / width;
+			const size_t i = n % target.width();
+			const size_t j = n / target.width();
 
 			//Relative texture coordinates
-			const auto u = (float)i / width;
-			const auto v = (float)j / height;
+			const auto u = (float)i / target.width();
+			const auto v = (float)j / target.height();
 
-			//Apply function
-			const quint8 col = pixel(UV(u, v));
-
-			//Store result
-			target.setPixel((int)i, (int)j, qRgb((int)col, (int)col, (int)col));
+			//Apply function and store result
+			target.at(i, j) = pixel(UV(u, v));
 		};
 
 #ifdef NO_PARALLEL_PIXEL_FUNC
 
 		//Sequential foreach
-		for (size_t i = 0; i < (height * width); i++)
+		for (size_t i = 0; i < (target.height() * target.width()); i++)
 		{
 			proc(i);
 		}
@@ -52,10 +47,11 @@ public:
 
 		//Parallel foreach
 		//Execute the pixel function for every pixel (concurrently)
-		QtConcurrent::blockingMap(CountingIterator(0), CountingIterator(height * width), proc);
+		QtConcurrent::blockingMap(CountingIterator(0), CountingIterator(target.height() * target.width()), proc);
 
 #endif
 
-		return QPixmap::fromImage(std::move(target));
+		return target.toPixmap();
+		//return QPixmap::fromImage(std::move(target));
 	}
 };

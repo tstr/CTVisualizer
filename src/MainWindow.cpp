@@ -5,13 +5,18 @@
 #include <QtWidgets>
 
 #include "MainWindow.h"
-#include "VolumeRender.h"
+#include "gfx/VolumeRender.h"
 #include "util/LabelledSlider.h"
 
-#define IMAGE_SCALE_MIN 10
-#define IMAGE_SCALE_MAX 200
-#define CTRL_WIDGET_WIDTH_MIN 400
-#define CTRL_WIDGET_WIDTH_MAX 400
+enum Constants
+{
+	IMAGE_SCALE_MIN = 10,
+	IMAGE_SCALE_MAX = 200,
+	CTRL_WIDGET_WIDTH_MIN = 400,
+	CTRL_WIDGET_WIDTH_MAX = 400,
+	CAMERA_WIDTH = 300,
+	CAMERA_HEIGHT = 300
+};
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -89,7 +94,7 @@ void MainWindow::resizeTargets(float scaleFactor)
 void MainWindow::updateCamera(const QMatrix4x4& matrix)
 {
 	m_3DView->setPixmap(
-		m_render.draw3D(256, 256, matrix)
+		m_render.draw3D(CAMERA_WIDTH, CAMERA_HEIGHT, matrix)
 	);
 }
 
@@ -101,9 +106,11 @@ QWidget* MainWindow::createWidgets()
 	QHBoxLayout *layout = new QHBoxLayout(this);
 	layout->addWidget(createControlArea());
 	layout->addWidget(createImageArea());
+	layout->addWidget(create3DArea());
 
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	/*
-		Events
+		2D Events
 	*/
 
 	//Connect sliders
@@ -129,13 +136,10 @@ QWidget* MainWindow::createWidgets()
 	m_ySlider->setSliderPosition((int)m_render.volume()->sizeY() / 2);
 	m_zSlider->setSliderPosition((int)m_render.volume()->sizeZ() / 2);
 	
-	//3D
-	m_3DView = new QLabel(this);
-	m_3DView->setText("test label");
-	m_3DView->setPixmap(
-		m_render.draw3D(256, 256, QMatrix())
-	);
-	layout->addWidget(m_3DView);
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	/*
+		3D Events
+	*/
 
 	m_rotationXSlider->setSliderPosition(0);
 	m_rotationYSlider->setSliderPosition(0);
@@ -143,12 +147,38 @@ QWidget* MainWindow::createWidgets()
 	connect(m_rotationXSlider, &LabelledSlider::valueChanged, &m_camera, &ArcballCamera::setRotationX);
 	connect(m_rotationYSlider, &LabelledSlider::valueChanged, &m_camera, &ArcballCamera::setRotationY);
 	connect(&m_camera, &ArcballCamera::cameraUpdated, this, &MainWindow::updateCamera);
+	
+	updateCamera(QMatrix4x4());
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	//Central widget
 	QWidget* center = new QWidget(this);
 	center->setLayout(layout);
 
 	return center;
+}
+
+
+QWidget* MainWindow::create3DArea()
+{
+	m_3DView = new QLabel(this);
+	m_3DView->setText("test label");
+	m_3DView->setAlignment(Qt::AlignCenter);
+
+	QVBoxLayout* layout = new QVBoxLayout();
+	layout->addWidget(m_3DView);
+	
+	QFrame* area = new QFrame(this);
+	area->setLayout(layout);
+
+	//Set background colour
+	QPalette pal(palette());
+	pal.setColor(QPalette::Background, Qt::gray);
+	area->setAutoFillBackground(true);
+	area->setPalette(pal);
+
+	return area;
 }
 
 QWidget* MainWindow::createImageArea()
@@ -167,16 +197,16 @@ QWidget* MainWindow::createImageArea()
 	imageLayout->addWidget(m_sideImage, 0, 1);
 	imageLayout->addWidget(m_frontImage, 1, 0);
 
-	QScrollArea* scrollArea = new QScrollArea(this);
-	scrollArea->setLayout(imageLayout);
+	QFrame* area = new QFrame(this);
+	area->setLayout(imageLayout);
 
 	//Set background colour
 	QPalette pal(palette());
 	pal.setColor(QPalette::Background, Qt::gray);
-	scrollArea->setAutoFillBackground(true);
-	scrollArea->setPalette(pal);
+	area->setAutoFillBackground(true);
+	area->setPalette(pal);
 
-	return scrollArea;
+	return area;
 }
 
 QWidget* MainWindow::createControlArea()
@@ -214,11 +244,11 @@ QWidget* MainWindow::createControlArea()
 	ctrlLayout->addRow(QStringLiteral("Scale(%)"), m_scaleSlider);
 	ctrlLayout->addWidget(m_mipToggle);
 	ctrlLayout->addWidget(m_heToggle);
-
+	ctrlLayout->addWidget(new QSplitter(this));
 	ctrlLayout->addRow(QStringLiteral("X rotation:"), m_rotationXSlider);
 	ctrlLayout->addRow(QStringLiteral("Y rotation:"), m_rotationYSlider);
 
-	QGroupBox* ctrlGroup = new QGroupBox(QStringLiteral("Options"), this);
+	QGroupBox* ctrlGroup = new QGroupBox(QStringLiteral("CT Viewer"), this);
 	ctrlGroup->setLayout(ctrlLayout);
 	ctrlGroup->setMaximumWidth(CTRL_WIDGET_WIDTH_MAX);
 	ctrlGroup->setMinimumWidth(CTRL_WIDGET_WIDTH_MIN);
