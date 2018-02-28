@@ -19,7 +19,7 @@ public:
 		Pixel function must take a UV as an argument and return a byte value
 	*/
 	template<typename PixelFunc>
-	static QPixmap dispatch(ImageBuffer& target, const PixelFunc& pixel)
+	static void dispatch(ImageBuffer& target, const PixelFunc& pixel)
 	{
 		//Per-pixel procedure
 		auto proc = [&](size_t n) {
@@ -50,8 +50,5 @@ public:
 		QtConcurrent::blockingMap(CountingIterator(0), CountingIterator(target.height() * target.width()), proc);
 
 #endif
-
-		return target.toPixmap();
-		//return QPixmap::fromImage(std::move(target));
 	}
 };

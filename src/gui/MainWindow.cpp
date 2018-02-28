@@ -16,8 +16,8 @@ enum Constants
 	IMAGE_SCALE_MAX = 200,
 	CTRL_WIDGET_WIDTH_MIN = 400,
 	CTRL_WIDGET_WIDTH_MAX = 400,
-	CAMERA_WIDTH = 300,
-	CAMERA_HEIGHT = 300
+	CAMERA_WIDTH = 256,
+	CAMERA_HEIGHT = 256
 };
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////

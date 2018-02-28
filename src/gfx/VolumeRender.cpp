@@ -10,6 +10,7 @@
 #include "VolumeSubimageRange.h"
 #include "Samplers.h"
 #include "PixmapDrawer.h"
+#include "RayCasting.h"
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -58,6 +59,8 @@ void VolumeRender::enableHist(bool enable)
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// 2D
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 QPixmap VolumeRender::drawSubimage(quint32 w, quint32 h, quint32 index, VolumeAxis axis)
 {
@@ -71,7 +74,7 @@ QPixmap VolumeRender::drawSubimage(quint32 w, quint32 h, quint32 index, VolumeAx
 		VolumeSubimageRange range(&m_volume, axis);
 
 		//Draw using MIP
-		return PixmapDrawer::dispatch(m_targetBuffer, [&](UV coords)
+		PixmapDrawer::dispatch(m_targetBuffer, [&](UV coords)
 		{
 			Volume::ElementType max = std::numeric_limits<Volume::ElementType>::min();
 			
@@ -90,12 +93,16 @@ QPixmap VolumeRender::drawSubimage(quint32 w, quint32 h, quint32 index, VolumeAx
 	{
 		VolumeSubimage view(&m_volume, index, axis);
 
-		return PixmapDrawer::dispatch(m_targetBuffer, [&](UV coords) {
+		PixmapDrawer::dispatch(m_targetBuffer, [&](UV coords) {
 			return normalize(BilinearSampler::sample(view, coords));
 		});
 	}
+
+	return m_targetBuffer.toPixmap();
 }
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//	3D
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 QPixmap VolumeRender::draw3D(quint32 w, quint32 h, const QMatrix4x4& viewProj)
@@ -103,35 +110,48 @@ QPixmap VolumeRender::draw3D(quint32 w, quint32 h, const QMatrix4x4& viewProj)
 	//Ensure there is enough room in target buffer
 	m_targetBuffer.realloc(w, h);
 
-	return PixmapDrawer::dispatch(m_targetBuffer, [&](UV coord) {
+	QMatrix4x4 world;
+	world.scale(1.4f, 1.4f, 1.4f);
+
+	PixmapDrawer::dispatch(m_targetBuffer, [&](UV coord)->quint8 {
 
 		const QVector3D offset(0.5f, 0.5f, 0.5f);
-		
-		QVector4D origin(coord.toVector(), 0.0f, 1.0f);
-		origin -= offset;
-		origin = viewProj * origin;
-		origin += offset;
-		
-		QVector3D dir(0, 0, 1.0f);
-		dir = viewProj * dir;
 
-		Volume::ElementType max = std::numeric_limits<Volume::ElementType>::min();
+		Ray ray;
 
-		const size_t numSteps = 120;
+		//Compute ray origin
+		ray.origin = QVector4D(coord.toVector(), -1.0f, 1.0f);
+		ray.origin -= offset;
+		ray.origin = viewProj * ray.origin;
+		ray.origin = world * ray.origin;
+		ray.origin += offset;
 
-		for (size_t i = 0; i < numSteps; i++)
+		//Compute ray direction
+		ray.dir = QVector3D(0, 0, 1.0f);
+		ray.dir = viewProj * ray.dir;
+		ray.dir.normalize();
+
+		//Default
+		Volume::ElementType max = m_volume.min();
+
+		//Perform ray cast into volume
+		RaycastResult raycast = Raycast::intersects(
+			AABB(QVector3D(0.0f, 0.0f, 0.0f), QVector3D(1.0f, 1.0f, 1.0f)),
+			ray,
+			100 //sample frequency
+		);
+
+		//Traverse volume along ray
+		for (const QVector3D& pos : raycast)
 		{
-			const float step = (float)i / numSteps;
-
-			QVector4D cur = origin + (step * dir);
-
-			const auto value = TrilinearSampler::sample(m_volume, cur.toVector3D());
-
-			max = std::max(max, value);
+			//Maximum intensity projection
+			max = std::max(max, TrilinearSampler::sample(m_volume, pos));
 		}
-		
+
 		return m_simpleMapper.normalize(max);
 	});
+
+	return m_targetBuffer.toPixmap();
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

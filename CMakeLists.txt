@@ -64,6 +64,8 @@ set(sources
 	src/gfx/HistogramEqualization.h
 	src/gfx/HistogramEqualization.cpp
 	src/gfx/Camera.h
+	src/gfx/RayCasting.h
+	src/gfx/RayCasting.cpp
 
 	src/util/ImageBuffer.h
 	src/util/CountingIterator.h

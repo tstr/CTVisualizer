@@ -26,8 +26,6 @@ public:
 		QMatrix4x4 matrix;
 		matrix.rotate(m_xRotation, 1, 0, 0);
 		matrix.rotate(m_yRotation, 0, 1, 0);
-
-		//matrix.rotate(QQuaternion::fromEulerAngles(m_yRotation, m_xRotation, 0.0f));
 		//matrix.ortho(512, 512, 512, 512, 0.1f, 100.0f);
 		return matrix;
 	}
