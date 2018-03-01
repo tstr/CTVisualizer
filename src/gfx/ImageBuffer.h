@@ -1,5 +1,7 @@
 /*
-	Image buffer helper
+	Image buffer class:
+
+	Represents an 8bit grey scale image
 */
 
 #pragma once
@@ -11,12 +13,16 @@ class ImageBuffer
 {
 public:
 
+	using ElementType = quint8;
+	using SizeType = quint32;
+	using IndexType = quint32;
+
 	ImageBuffer() {}
 
 	/*
 		Construct image buffer with reserved size
 	*/
-	ImageBuffer(size_t width, size_t height)
+	ImageBuffer(SizeType width, SizeType height)
 	{
 		this->realloc(width, height);
 	}
@@ -24,14 +30,14 @@ public:
 	/*
 		Fetch a pixel at the given coordinates
 	*/
-	quint8& at(size_t u, size_t v)
+	ElementType& at(IndexType u, IndexType v)
 	{
 		Q_ASSERT(u < m_width);
 		Q_ASSERT(v < m_height);
 		return m_image[(int)((v * m_width) + u)];
 	}
 
-	quint8 at(size_t u, size_t v) const
+	ElementType at(IndexType u, IndexType v) const
 	{
 		Q_ASSERT(u < m_width);
 		Q_ASSERT(v < m_height);
@@ -43,7 +49,7 @@ public:
 
 		Old content may be discarded.
 	*/
-	ImageBuffer& realloc(size_t width, size_t height)
+	ImageBuffer& realloc(SizeType width, SizeType height)
 	{
 		//Increase buffer size if necessary
 		if ((width * height) > (m_width * m_height))
@@ -60,8 +66,8 @@ public:
 	/*
 		Buffer dimensions
 	*/
-	size_t width() const { return m_width; }
-	size_t height() const { return m_height; }
+	SizeType width() const { return m_width; }
+	SizeType height() const { return m_height; }
 
 	/*
 		Convert to image
@@ -86,7 +92,7 @@ public:
 
 private:
 
-	size_t m_width = 0;
-	size_t m_height = 0;
-	QVector<quint8> m_image; //data
+	SizeType m_width = 0;
+	SizeType m_height = 0;
+	QVector<ElementType> m_image; //data
 };

@@ -37,6 +37,8 @@ ThumbnailDialog::ThumbnailDialog(VolumeRender* render, VolumeAxis axis, QWidget*
 	m_tbList->resize(DIALOG_WIDTH, DIALOG_HEIGHT);
 	m_tbList->setDragEnabled(false);
 
+	ImageBuffer image(THUMBNAIL_WIDTH, THUMBNAIL_HEIGHT);
+
 	//For every subimage along axis
 	for (const VolumeSubimage& subimage : range)
 	{
@@ -44,10 +46,10 @@ ThumbnailDialog::ThumbnailDialog(VolumeRender* render, VolumeAxis axis, QWidget*
 		QListWidgetItem* item = new QListWidgetItem(m_tbList);
 
 		//Draw slice and store result in QIcon
+		render->drawSubimage(image, subimage.index(), axis);
+		
 		QIcon icon;
-		icon.addPixmap(
-			render->drawSubimage(THUMBNAIL_WIDTH, THUMBNAIL_HEIGHT, subimage.index(), axis)
-		);
+		icon.addPixmap(image.toPixmap());
 
 		item->setIcon(icon);
 		item->setText(QString::number(subimage.index()));
@@ -55,10 +57,21 @@ ThumbnailDialog::ThumbnailDialog(VolumeRender* render, VolumeAxis axis, QWidget*
 		m_tbList->addItem(item);
 	}
 
-	QDialog::setLayout(new QVBoxLayout(this));
+	//Setup ListView widget and sizing
 	QDialog::setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 	QDialog::resize(DIALOG_WIDTH, DIALOG_HEIGHT);
+	QDialog::setLayout(new QVBoxLayout(this));
 	QDialog::layout()->addWidget(m_tbList);
+
+	//Set title
+	QString axisLabels[] = 
+	{
+		QStringLiteral("X Subimages"),
+		QStringLiteral("Y Subimages"),
+		QStringLiteral("Z Subimages")
+	};
+
+	QDialog::setWindowTitle(axisLabels[axis]);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////

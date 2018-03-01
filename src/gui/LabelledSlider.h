@@ -12,6 +12,7 @@
 class LabelledSlider : public QSlider
 {
 	Q_OBJECT
+	Q_DISABLE_COPY(LabelledSlider)
 
 public:
 

@@ -1,7 +1,7 @@
 /*
 	Render Context class
 
-	Provides functionality for viewing and volume data
+	Provides functionality for rendering volume data.
 */
 
 #pragma once
@@ -11,15 +11,14 @@
 #include <QMatrix4x4>
 
 #include "Volume.h"
-#include "VolumeSubimage.h"
 #include "HistogramEqualization.h"
-#include "util/ImageBuffer.h"
+#include "ImageBuffer.h"
 
 class VolumeRender : public QObject
 {
 	Q_OBJECT
 	Q_DISABLE_COPY(VolumeRender)
-	Q_PROPERTY(bool mip READ mipEnabled WRITE enableMip)	// Maximum intensity projection
+	//Render states
 	Q_PROPERTY(bool hist READ histEnabled WRITE enableHist) // Histogram equalization
 
 public:
@@ -32,49 +31,47 @@ public:
 	/*
 		Draw a single subimage
 	*/
-	QPixmap drawSubimage(quint32 width, quint32 height, quint32 index, VolumeAxis axis);
+	void drawSubimage(ImageBuffer& target, Volume::IndexType index, VolumeAxis axis);
 
 	/*
-		Draw a 3D view
+		Draw an axis of the volume using Maximum Intensity Projection
 	*/
-	QPixmap draw3D(quint32 width, quint32 height, const QMatrix4x4& viewProj);
+	void drawSubimageMIP(ImageBuffer& target, VolumeAxis axis);
+
+	/*
+		Render the volume in 3D using the given transform
+	*/
+	void draw3D(ImageBuffer& target, const QMatrix4x4& modelView);
 
 	/*
 		Get volume data
 	*/
 	const Volume* volume() const { return &m_volume; }
 
-	bool mipEnabled() const { return m_mip; }
-	bool histEnabled() const { return m_hist; }
+	/*
+		Returns true if colour mapping table is set to Histogram Equalization
+	*/
+	bool histEnabled() const;
 
 public slots:
 
-	void enableMip(bool enable);
+	/*
+		Set the colour mapping table to Histogram Equalization
+	*/
 	void enableHist(bool enable);
 
 signals:
 
-	void redrawAll();
+	void redraw2D();
 
 private:
 
-	//Converts voxel to displayable grayscale value
-	quint8 normalize(Volume::ElementType value);
-
 	//Volume data
 	Volume m_volume;
-
-	//Temporary image buffer for performing drawing operations on
-	ImageBuffer m_targetBuffer;
 
 	//Colour mapping tables
 	HistogramEqualizer m_histogramMapper;
 	SimpleEqualizer m_simpleMapper;
 	//Current colour mapping table
 	const MappingTable* m_mapper;
-
-	//Histogram equalization
-	bool m_hist = true;
-	//Maximum intensity projection
-	bool m_mip = false;
 };

@@ -16,7 +16,8 @@ class CameraView;
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
-	
+	Q_DISABLE_COPY(MainWindow)
+
 public:
 	
     explicit MainWindow(Volume& volume, QWidget *parent = 0);

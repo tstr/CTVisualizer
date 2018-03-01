@@ -9,9 +9,11 @@
 #include "VolumeRender.h"
 #include "VolumeSubimageRange.h"
 #include "Samplers.h"
-#include "PixmapDrawer.h"
+#include "ImageDrawer.h"
 #include "RayCasting.h"
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Constructor
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 VolumeRender::VolumeRender(Volume& volume, QObject* parent) :
@@ -24,27 +26,19 @@ VolumeRender::VolumeRender(Volume& volume, QObject* parent) :
 	m_mapper = &m_simpleMapper;
 }
 
-//Converts voxel to greyscale value
-quint8 VolumeRender::normalize(Volume::ElementType value)
-{
-	//Lookup equalized value from current mapping table
-	return m_mapper->normalize(value);
-}
-
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Render states
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void VolumeRender::enableMip(bool enable)
+bool VolumeRender::histEnabled() const
 {
-	m_mip = enable;
-	emit redrawAll();
+	return m_mapper == &m_histogramMapper;
 }
 
 void VolumeRender::enableHist(bool enable)
 {
-	m_hist = enable;
-
 	//Change colour mapping table
-	if (m_hist)
+	if (enable)
 	{
 		//Histogram equalization
 		m_mapper = &m_histogramMapper;
@@ -55,65 +49,50 @@ void VolumeRender::enableHist(bool enable)
 		m_mapper = &m_simpleMapper;
 	}
 
-	emit redrawAll();
+	emit redraw2D();
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// 2D
+// Drawing function
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-QPixmap VolumeRender::drawSubimage(quint32 w, quint32 h, quint32 index, VolumeAxis axis)
+void VolumeRender::drawSubimage(ImageBuffer& target, Volume::IndexType index, VolumeAxis axis)
 {
-	//Ensure there is enough room in target buffer
-	m_targetBuffer.realloc(w, h);
+	VolumeSubimage view(&m_volume, index, axis);
 
-	//If maximum intensity projection enabled
-	if (m_mip)
+	ImageDrawer::dispatch(target, [&](UV coords) {
+		return m_mapper->normalize(BilinearSampler::sample(view, coords));
+	});
+}
+
+void VolumeRender::drawSubimageMIP(ImageBuffer& target, VolumeAxis axis)
+{
+	//Construct a range over the given axis
+	VolumeSubimageRange range(&m_volume, axis);
+
+	//Draw using MIP
+	ImageDrawer::dispatch(target, [&](UV coords)
 	{
-		//Construct a range over the given axis
-		VolumeSubimageRange range(&m_volume, axis);
+		Volume::ElementType max = std::numeric_limits<Volume::ElementType>::min();
 
-		//Draw using MIP
-		PixmapDrawer::dispatch(m_targetBuffer, [&](UV coords)
+		//Iterate over every slice
+		for (const VolumeSubimage& view : range)
 		{
-			Volume::ElementType max = std::numeric_limits<Volume::ElementType>::min();
-			
-			//Iterate over every slice
-			for (const VolumeSubimage& view : range)
-			{
-				//Override max if sampled value is greater
-				max = std::max(max, BilinearSampler::sample(view, coords));
-			}
+			//Override max if sampled value is greater
+			max = std::max(max, BilinearSampler::sample(view, coords));
+		}
 
-			return normalize(max);
-		});
-	}
-	//Otherwise just draw a single slice
-	else
-	{
-		VolumeSubimage view(&m_volume, index, axis);
-
-		PixmapDrawer::dispatch(m_targetBuffer, [&](UV coords) {
-			return normalize(BilinearSampler::sample(view, coords));
-		});
-	}
-
-	return m_targetBuffer.toPixmap();
+		return m_mapper->normalize(max);
+	});
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //	3D
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-QPixmap VolumeRender::draw3D(quint32 w, quint32 h, const QMatrix4x4& viewProj)
+void VolumeRender::draw3D(ImageBuffer& target, const QMatrix4x4& modelView)
 {
-	//Ensure there is enough room in target buffer
-	m_targetBuffer.realloc(w, h);
-
-	QMatrix4x4 world;
-	world.scale(1.4f, 1.4f, 1.4f);
-
-	PixmapDrawer::dispatch(m_targetBuffer, [&](UV coord)->quint8 {
+	ImageDrawer::dispatch(target, [&](UV coord)->quint8 {
 
 		const QVector3D offset(0.5f, 0.5f, 0.5f);
 
@@ -122,13 +101,12 @@ QPixmap VolumeRender::draw3D(quint32 w, quint32 h, const QMatrix4x4& viewProj)
 		//Compute ray origin
 		ray.origin = QVector4D(coord.toVector(), -1.0f, 1.0f);
 		ray.origin -= offset;
-		ray.origin = viewProj * ray.origin;
-		ray.origin = world * ray.origin;
+		ray.origin = modelView * ray.origin;
 		ray.origin += offset;
 
 		//Compute ray direction
 		ray.dir = QVector3D(0, 0, 1.0f);
-		ray.dir = viewProj * ray.dir;
+		ray.dir = modelView * ray.dir;
 		ray.dir.normalize();
 
 		//Default
@@ -150,8 +128,6 @@ QPixmap VolumeRender::draw3D(quint32 w, quint32 h, const QMatrix4x4& viewProj)
 
 		return m_simpleMapper.normalize(max);
 	});
-
-	return m_targetBuffer.toPixmap();
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

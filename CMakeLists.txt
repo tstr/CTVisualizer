@@ -64,13 +64,13 @@ set(sources
 	src/gfx/VolumeSubimage.cpp
 	src/gfx/VolumeSubimageRange.h
 	src/gfx/Samplers.h
-    src/gfx/PixmapDrawer.h
+    src/gfx/ImageDrawer.h
+	src/gfx/ImageBuffer.h
 	src/gfx/HistogramEqualization.h
 	src/gfx/HistogramEqualization.cpp
 	src/gfx/RayCasting.h
 	src/gfx/RayCasting.cpp
 
-	src/util/ImageBuffer.h
 	src/util/CountingIterator.h
 )
 

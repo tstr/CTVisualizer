@@ -1,5 +1,13 @@
 /*
-	Image samplers
+	Image samplers:
+
+	Contains a set of functions for sampling both Volumes and 2D images.
+
+	2D images can be any generic type as long as they implement 3 methods:
+		- quint16 at(quint32 u, quint32 v) const
+		- quint32 width() const
+		- quint32 height() const
+	The arguments u, v for the method at() must be less than width() and height() respectively.
 */
 
 #pragma once
@@ -8,7 +16,6 @@
 #include <QVector3D>
 
 #include "Volume.h"
-#include "VolumeSubimage.h"
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -57,21 +64,10 @@ struct UVW
 /*
 	Helper functions
 */
-
-//Clamp texture coordinate value u
-Volume::IndexType clamp(float u, Volume::SizeType x)
-{
-	return std::max(
-		0u,
-		std::min(
-			x - 1,
-			(Volume::IndexType)(u * (float)x)
-		)
-	);
-}
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 //Linear interpolate between two values
-static Volume::ElementType lerp(Volume::ElementType v0, Volume::ElementType v1, float step)
+inline Volume::ElementType lerp(Volume::ElementType v0, Volume::ElementType v1, float step)
 {
 	return (Volume::ElementType)(v0 + (((float)v1 - v0) * step));
 }
@@ -104,7 +100,8 @@ public:
 		return volume.at(x, y, z);
 	}
 
-	static Volume::ElementType sample(const VolumeSubimage& view, const UV& coords)
+	template<typename Image2D>
+	static Volume::ElementType sample(const Image2D& view, const UV& coords)
 	{
 		const auto x = (Volume::IndexType)(coords.u * view.width());
 		const auto y = (Volume::IndexType)(coords.v * view.height());
@@ -128,7 +125,8 @@ class BilinearSampler
 {
 public:
 
-	static Volume::ElementType sample(const VolumeSubimage& view, const UV& coords)
+	template<typename Image2D>
+	static Volume::ElementType sample(const Image2D& view, const UV& coords)
 	{
 		/*
 		 (x0,y0)--(x1,y0)	a->
@@ -179,8 +177,6 @@ public:
 
 /*
 	Bicubic sampler
-
-	formula derived from this example: http://www.paulinternet.nl/?page=bicubic
 */
 class BicubicSampler
 {
@@ -194,7 +190,8 @@ private:
 
 public:
 
-	static Volume::ElementType sample(const VolumeSubimage& view, const UV& coords)
+	template<typename Image2D>
+	static Volume::ElementType sample(const Image2D& view, const UV& coords)
 	{
 		/*
 			16 control points a->p

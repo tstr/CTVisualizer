@@ -6,10 +6,10 @@
 #include <QImage>
 #include <QtConcurrentMap>
 
-#include "util/ImageBuffer.h"
 #include "util/CountingIterator.h"
+#include "ImageBuffer.h"
 
-class PixmapDrawer
+class ImageDrawer
 {
 public:
 
@@ -24,8 +24,8 @@ public:
 		//Per-pixel procedure
 		auto proc = [&](size_t n) {
 
-			const size_t i = n % target.width();
-			const size_t j = n / target.width();
+			const quint32 i = (quint32)n % target.width();
+			const quint32 j = (quint32)n / target.width();
 
 			//Relative texture coordinates
 			const auto u = (float)i / target.width();

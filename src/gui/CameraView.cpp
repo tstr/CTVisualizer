@@ -4,10 +4,7 @@
 
 #include "CameraView.h"
 
-#include <cmath>
-
 #include <QMouseEvent>
-#include <QDebug>
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -38,9 +35,17 @@ CameraView::CameraView(VolumeRender* render, QWidget* parent) :
 */
 void CameraView::redraw()
 {
-	m_image.setPixmap(
-		m_render->draw3D(m_width, m_height, m_viewMatrix)
-	);
+	//Resize buffer if necessary
+	m_buffer.realloc(m_width, m_height);
+
+	QMatrix4x4 world;
+	world.scale(1.4f, 1.4f, 1.4f);
+
+	//Render 3D view
+	m_render->draw3D(m_buffer, world * m_viewMatrix);
+
+	//Present view
+	m_image.setPixmap(m_buffer.toPixmap());
 }
 
 QVector3D CameraView::mapToSphere(const QPointF& point)
@@ -59,7 +64,7 @@ QVector3D CameraView::mapToSphere(const QPointF& point)
 	vec.setY(y);
 	//NaN occurs when point is outside sphere
 	//Clamp z value to 0 if outside
-	vec.setZ((isnan(z)) ? 0.0f : z);
+	vec.setZ((std::isnan(z)) ? 0.0f : z);
 
 	return vec.normalized();
 }

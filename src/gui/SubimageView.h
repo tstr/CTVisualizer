@@ -15,6 +15,7 @@ class SubimageView : public QWidget
 	Q_DISABLE_COPY(SubimageView)
 	Q_PROPERTY(Volume::IndexType index READ index WRITE setIndex)
 	Q_PROPERTY(float scale READ scale WRITE setScale RESET unsetScale)
+	Q_PROPERTY(bool mip READ usesMIP WRITE useMIP)
 
 public:
 	
@@ -28,6 +29,7 @@ public:
 	*/
 	float scale() const { return m_scaleFactor; }
 	Volume::IndexType index() const { return m_index; }
+	bool usesMIP() const { return m_useMip; }
 
 	//Reset scale
 	void unsetScale() { m_scaleFactor = 1.0f; }
@@ -39,6 +41,7 @@ public slots:
 	*/
 	void setScale(float scale) { m_scaleFactor = scale; redraw(); }
 	void setIndex(Volume::IndexType idx) { m_index = idx; redraw(); }
+	void useMIP(bool use) { m_useMip = use; redraw(); }
 
 	/*
 		Redraw subimage
@@ -51,10 +54,14 @@ private:
 	void mousePressEvent(QMouseEvent* event) override;
 
 	float m_scaleFactor = 1.0f;
-	VolumeAxis m_axis = VolumeAxis::XAxis;
+	bool m_useMip = false;
 	Volume::IndexType m_index = 0;
+
+	VolumeAxis m_axis = VolumeAxis::XAxis;
 	Volume::SizeType m_scaledWidth = 0;
 	Volume::SizeType m_scaledHeight = 0;
+
+	ImageBuffer m_buffer;
 
 	QLabel m_image;
 	QLabel m_imageLabel;

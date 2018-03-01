@@ -49,7 +49,7 @@ void MainWindow::scaleImages(int value)
 	m_ySubimage->setScale(scaleFactor);
 	m_zSubimage->setScale(scaleFactor);
 
-	m_render.redrawAll();
+	m_render.redraw2D();
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -74,9 +74,11 @@ QWidget* MainWindow::createWidgets()
 
 	connect(m_scaleSlider, &QSlider::valueChanged, this, &MainWindow::scaleImages);
 
-	//Connect draw options
-	connect(m_mipToggle, &QCheckBox::toggled, &m_render, &VolumeRender::enableMip);
+	//Connect rendering options
 	connect(m_heToggle, &QCheckBox::toggled, &m_render, &VolumeRender::enableHist);
+	connect(m_mipToggle, &QCheckBox::toggled, m_xSubimage, &SubimageView::useMIP);
+	connect(m_mipToggle, &QCheckBox::toggled, m_ySubimage, &SubimageView::useMIP);
+	connect(m_mipToggle, &QCheckBox::toggled, m_zSubimage, &SubimageView::useMIP);
 
 	//When MIP is enabled, disable the view sliders
 	connect(m_mipToggle, &QCheckBox::toggled, m_xSlider, &QSlider::setDisabled);
@@ -84,9 +86,9 @@ QWidget* MainWindow::createWidgets()
 	connect(m_mipToggle, &QCheckBox::toggled, m_zSlider, &QSlider::setDisabled);
 
 	//Connect redraw signal - subimage widgets are redrawn when renderer is updated
-	connect(&m_render, &VolumeRender::redrawAll, m_xSubimage, &SubimageView::redraw);
-	connect(&m_render, &VolumeRender::redrawAll, m_ySubimage, &SubimageView::redraw);
-	connect(&m_render, &VolumeRender::redrawAll, m_zSubimage, &SubimageView::redraw);
+	connect(&m_render, &VolumeRender::redraw2D, m_xSubimage, &SubimageView::redraw);
+	connect(&m_render, &VolumeRender::redraw2D, m_ySubimage, &SubimageView::redraw);
+	connect(&m_render, &VolumeRender::redraw2D, m_zSubimage, &SubimageView::redraw);
 
 	m_xSlider->setSliderPosition((int)m_render.volume()->sizeX() / 2);
 	m_ySlider->setSliderPosition((int)m_render.volume()->sizeY() / 2);

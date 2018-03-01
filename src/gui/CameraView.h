@@ -13,6 +13,7 @@
 class CameraView : public QWidget
 {
 	Q_OBJECT
+	Q_DISABLE_COPY(CameraView)
 
 public:
 
@@ -38,7 +39,6 @@ private:
 
 	//Camera matrices
 	QMatrix4x4 m_viewMatrix;
-	QMatrix4x4 m_projectionMatrix;
 
 	//View dimensions
 	quint32 m_width;
@@ -46,6 +46,8 @@ private:
 
 	QLabel m_image;
 	QVBoxLayout m_layout;
+
+	ImageBuffer m_buffer;
 	
 	VolumeRender* m_render;
 };

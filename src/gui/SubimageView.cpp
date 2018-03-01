@@ -51,16 +51,28 @@ SubimageView::SubimageView(VolumeRender* render, VolumeAxis axis, Volume::IndexT
 	redraw();
 }
 
-
 void SubimageView::redraw()
 {
+	//Reserve space in buffer
 	const Volume::SizeType w = m_scaleFactor * m_scaledWidth;
 	const Volume::SizeType h = m_scaleFactor * m_scaledHeight;
+	m_buffer.realloc(w, h);
 
-	m_image.setPixmap(
-		m_render->drawSubimage(w, h, m_index, m_axis)
-	);
+	//If using maximum intensity projection
+	//Render view
+	if (m_useMip)
+	{
+		m_render->drawSubimageMIP(m_buffer, m_axis);
+	}
+	else
+	{
+		m_render->drawSubimage(m_buffer, m_index, m_axis);
+	}
 
+	//Present view
+	m_image.setPixmap(m_buffer.toPixmap());
+
+	//Update size label
 	m_imageLabel.setText(m_text + QString::number(w) + "x" + QString::number(h));
 }
 
