@@ -37,7 +37,7 @@ MainWindow::~MainWindow()
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
-//	Image drawing
+//	Slots
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void MainWindow::scaleImages(int value)
@@ -64,7 +64,7 @@ QWidget* MainWindow::createWidgets()
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	/*
-		2D Events
+		Events
 	*/
 
 	//Connect sliders
@@ -85,10 +85,17 @@ QWidget* MainWindow::createWidgets()
 	connect(m_mipToggle, &QCheckBox::toggled, m_ySlider, &QSlider::setDisabled);
 	connect(m_mipToggle, &QCheckBox::toggled, m_zSlider, &QSlider::setDisabled);
 
-	//Connect redraw signal - subimage widgets are redrawn when renderer is updated
+	//Sampling functions
+	connect(m_samplerDefault,  &QRadioButton::clicked, &m_render, &VolumeRender::setSamplingTypeBasic);
+	connect(m_samplerBilinear, &QRadioButton::clicked, &m_render, &VolumeRender::setSamplingTypeBilinear);
+	connect(m_samplerBicubic,  &QRadioButton::clicked, &m_render, &VolumeRender::setSamplingTypeBicubic);
+
+	//Connect redraw signals - subimage widgets are redrawn when renderer is updated
 	connect(&m_render, &VolumeRender::redraw2D, m_xSubimage, &SubimageView::redraw);
 	connect(&m_render, &VolumeRender::redraw2D, m_ySubimage, &SubimageView::redraw);
 	connect(&m_render, &VolumeRender::redraw2D, m_zSubimage, &SubimageView::redraw);
+
+	connect(&m_render, &VolumeRender::redraw3D, m_3DView, &CameraView::redraw);
 
 	m_xSlider->setSliderPosition((int)m_render.volume()->sizeX() / 2);
 	m_ySlider->setSliderPosition((int)m_render.volume()->sizeY() / 2);
@@ -151,10 +158,8 @@ QWidget* MainWindow::createImageArea()
 
 QWidget* MainWindow::createControlArea()
 {
-	QFormLayout* ctrlLayout = new QFormLayout(this);
-	ctrlLayout->setMargin(5);
-	ctrlLayout->setAlignment(Qt::AlignTop | Qt::AlignLeft);
-	
+	///////////////////////////////////////////////////////////////////////////////////////////////////
+
 	//X view
 	m_xSlider = new LabelledSlider(this);
 	m_xSlider->setRange(0, (int)m_render.volume()->sizeX() - 1);
@@ -169,23 +174,51 @@ QWidget* MainWindow::createControlArea()
 	m_scaleSlider->setRange(IMAGE_SCALE_MIN, IMAGE_SCALE_MAX);
 	m_scaleSlider->setValue(100);
 
+	///////////////////////////////////////////////////////////////////////////////////////////////////
+
 	m_mipToggle = new QCheckBox(QStringLiteral("Maximum Intensity Projection"), this);
 	m_heToggle = new QCheckBox(QStringLiteral("Histogram Equalization"), this);
 
-	ctrlLayout->addRow(QStringLiteral("X: Side"), m_xSlider);
-	ctrlLayout->addRow(QStringLiteral("Y: Front"), m_ySlider);
-	ctrlLayout->addRow(QStringLiteral("Z: Top"), m_zSlider);
+	QGroupBox* samplerGroup = new QGroupBox(QStringLiteral("2D Sampler Function:"), this);
+
+	m_samplerDefault = new QRadioButton(QStringLiteral("Nearest-Neighbour"), samplerGroup);
+	m_samplerBilinear = new QRadioButton(QStringLiteral("Bilinear"), samplerGroup);
+	m_samplerBicubic = new QRadioButton(QStringLiteral("Bicubic"), samplerGroup);
+	m_samplerBilinear->setChecked(true);
+
+	QVBoxLayout* samplerLayout = new QVBoxLayout();
+	samplerLayout->addWidget(m_samplerDefault);
+	samplerLayout->addWidget(m_samplerBilinear);
+	samplerLayout->addWidget(m_samplerBicubic);
+
+	samplerGroup->setLayout(samplerLayout);
+
+	///////////////////////////////////////////////////////////////////////////////////////////////////
+
+	QVBoxLayout* ctrlLayout = new QVBoxLayout(this);
+	ctrlLayout->setMargin(5);
+	ctrlLayout->setAlignment(Qt::AlignTop | Qt::AlignLeft);
+
+	QFormLayout* ctrlSliders = new QFormLayout(this);
+	ctrlSliders->addRow(QStringLiteral("X: Side"), m_xSlider);
+	ctrlSliders->addRow(QStringLiteral("Y: Front"), m_ySlider);
+	ctrlSliders->addRow(QStringLiteral("Z: Top"), m_zSlider);
+	ctrlSliders->addWidget(new QSplitter(this));
+	ctrlSliders->addRow(QStringLiteral("Scale(%)"), m_scaleSlider);
+
+	ctrlLayout->addLayout(ctrlSliders);
 	ctrlLayout->addWidget(new QSplitter(this));
-	ctrlLayout->addRow(QStringLiteral("Scale(%)"), m_scaleSlider);
 	ctrlLayout->addWidget(m_mipToggle);
 	ctrlLayout->addWidget(m_heToggle);
+	ctrlLayout->addWidget(new QSplitter(this));
+	ctrlLayout->addWidget(samplerGroup);
 
-	QGroupBox* ctrlGroup = new QGroupBox(QStringLiteral("CT Viewer"), this);
-	ctrlGroup->setLayout(ctrlLayout);
-	ctrlGroup->setMaximumWidth(CTRL_WIDGET_WIDTH_MAX);
-	ctrlGroup->setMinimumWidth(CTRL_WIDGET_WIDTH_MIN);
+	QGroupBox* ctrlArea = new QGroupBox(QStringLiteral("Options"), this);
+	ctrlArea->setLayout(ctrlLayout);
+	ctrlArea->setMaximumWidth(CTRL_WIDGET_WIDTH_MAX);
+	ctrlArea->setMinimumWidth(CTRL_WIDGET_WIDTH_MIN);
 
-	return ctrlGroup;
+	return ctrlArea;
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////

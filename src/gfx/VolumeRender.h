@@ -13,6 +13,14 @@
 #include "Volume.h"
 #include "HistogramEqualization.h"
 #include "ImageBuffer.h"
+#include "Samplers.h"
+
+enum SamplingType
+{
+	SamplingBasic, //nearest-neighbour
+	SamplingBilinear,
+	SamplingBicubic
+};
 
 class VolumeRender : public QObject
 {
@@ -20,8 +28,11 @@ class VolumeRender : public QObject
 	Q_DISABLE_COPY(VolumeRender)
 	//Render states
 	Q_PROPERTY(bool hist READ histEnabled WRITE enableHist) // Histogram equalization
+	Q_PROPERTY(SamplingType sampling READ getSamplingType WRITE setSamplingType)
 
 public:
+
+	//////////////////////////////////////////////////////////////////////////////////
 
 	/*
 		Construct a volume viewer
@@ -48,26 +59,39 @@ public:
 	*/
 	const Volume* volume() const { return &m_volume; }
 
+	//////////////////////////////////////////////////////////////////////////////////
 	/*
-		Returns true if colour mapping table is set to Histogram Equalization
+		Properties
 	*/
+
+	//Returns true if colour mapping table is set to Histogram Equalization
 	bool histEnabled() const;
+	//Return the sampling type
+	SamplingType getSamplingType() const;
 
 public slots:
 
-	/*
-		Set the colour mapping table to Histogram Equalization
-	*/
+	//Set the colour mapping table to Histogram Equalization
 	void enableHist(bool enable);
+	//Set the sampling type
+	void setSamplingType(SamplingType type);
+	//Enable specific sampling types
+	void setSamplingTypeBasic() { setSamplingType(SamplingBasic); }
+	void setSamplingTypeBilinear() { setSamplingType(SamplingBilinear); }
+	void setSamplingTypeBicubic() { setSamplingType(SamplingBicubic); }
 
 signals:
 
 	void redraw2D();
+	void redraw3D();
 
 private:
 
 	//Volume data
 	Volume m_volume;
+
+	//Sampling function
+	SamplerFunc2D m_samplerFunc;
 
 	//Colour mapping tables
 	HistogramEqualizer m_histogramMapper;

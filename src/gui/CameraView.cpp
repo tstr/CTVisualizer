@@ -38,11 +38,12 @@ void CameraView::redraw()
 	//Resize buffer if necessary
 	m_buffer.realloc(m_width, m_height);
 
-	QMatrix4x4 world;
-	world.scale(1.4f, 1.4f, 1.4f);
+	//Scaling matrix
+	QMatrix4x4 scaling;
+	scaling.scale(1.4f, 1.4f, 1.4f);
 
 	//Render 3D view
-	m_render->draw3D(m_buffer, world * m_viewMatrix);
+	m_render->draw3D(m_buffer, m_viewMatrix * scaling);
 
 	//Present view
 	m_image.setPixmap(m_buffer.toPixmap());

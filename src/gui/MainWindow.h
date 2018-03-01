@@ -9,6 +9,7 @@
 
 class QLabel;
 class QCheckBox;
+class QRadioButton;
 class LabelledSlider;
 class SubimageView;
 class CameraView;
@@ -57,6 +58,11 @@ private:
 	QCheckBox* m_heToggle;
 	//mip toggle
 	QCheckBox* m_mipToggle;
+
+	//Sampler options
+	QRadioButton* m_samplerDefault;
+	QRadioButton* m_samplerBilinear;
+	QRadioButton* m_samplerBicubic;
 
 	//3D
 	CameraView* m_3DView;

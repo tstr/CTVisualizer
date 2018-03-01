@@ -24,6 +24,9 @@ VolumeRender::VolumeRender(Volume& volume, QObject* parent) :
 {
 	//Set default colour mapping table
 	m_mapper = &m_simpleMapper;
+
+	//Set default sampling function
+	m_samplerFunc = &BilinearSampler::sample;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -52,6 +55,37 @@ void VolumeRender::enableHist(bool enable)
 	emit redraw2D();
 }
 
+SamplingType VolumeRender::getSamplingType() const
+{
+	//Is nearest neighbour sampler
+	if (m_samplerFunc == (SamplerFunc2D)&BasicSampler::sample)
+		return SamplingBasic;
+
+	//Is bilinear sampler
+	if (m_samplerFunc == &BilinearSampler::sample)
+		return SamplingBilinear;
+
+	//Is bicubic sampler
+	if (m_samplerFunc == &BicubicSampler::sample)
+		return SamplingBicubic;
+
+	return SamplingBasic;
+}
+
+void VolumeRender::setSamplingType(SamplingType type)
+{
+	SamplerFunc2D funcs[] =
+	{
+		&BasicSampler::sample,
+		&BilinearSampler::sample,
+		&BicubicSampler::sample
+	};
+
+	m_samplerFunc = funcs[type];
+
+	redraw2D();
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Drawing function
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -61,7 +95,7 @@ void VolumeRender::drawSubimage(ImageBuffer& target, Volume::IndexType index, Vo
 	VolumeSubimage view(&m_volume, index, axis);
 
 	ImageDrawer::dispatch(target, [&](UV coords) {
-		return m_mapper->normalize(BilinearSampler::sample(view, coords));
+		return m_mapper->normalize(m_samplerFunc(view, coords));
 	});
 }
 
@@ -79,7 +113,7 @@ void VolumeRender::drawSubimageMIP(ImageBuffer& target, VolumeAxis axis)
 		for (const VolumeSubimage& view : range)
 		{
 			//Override max if sampled value is greater
-			max = std::max(max, BilinearSampler::sample(view, coords));
+			max = std::max(max, m_samplerFunc(view, coords));
 		}
 
 		return m_mapper->normalize(max);

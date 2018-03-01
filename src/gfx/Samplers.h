@@ -16,6 +16,7 @@
 #include <QVector3D>
 
 #include "Volume.h"
+#include "VolumeSubimage.h"
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -75,6 +76,12 @@ inline Volume::ElementType lerp(Volume::ElementType v0, Volume::ElementType v1, 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /*
+	Sampler function signatures
+*/
+using SamplerFunc2D = Volume::ElementType(*)(const VolumeSubimage&, const UV&);
+using SamplerFunc3D = Volume::ElementType(*)(const Volume&, const UVW&);
+
+/*
 	Nearest-Neighbour sampler
 */
 class BasicSampler
@@ -100,8 +107,7 @@ public:
 		return volume.at(x, y, z);
 	}
 
-	template<typename Image2D>
-	static Volume::ElementType sample(const Image2D& view, const UV& coords)
+	static Volume::ElementType sample(const VolumeSubimage& view, const UV& coords)
 	{
 		const auto x = (Volume::IndexType)(coords.u * view.width());
 		const auto y = (Volume::IndexType)(coords.v * view.height());
@@ -125,8 +131,7 @@ class BilinearSampler
 {
 public:
 
-	template<typename Image2D>
-	static Volume::ElementType sample(const Image2D& view, const UV& coords)
+	static Volume::ElementType sample(const VolumeSubimage& view, const UV& coords)
 	{
 		/*
 		 (x0,y0)--(x1,y0)	a->
@@ -190,8 +195,7 @@ private:
 
 public:
 
-	template<typename Image2D>
-	static Volume::ElementType sample(const Image2D& view, const UV& coords)
+	static Volume::ElementType sample(const VolumeSubimage& view, const UV& coords)
 	{
 		/*
 			16 control points a->p
