@@ -53,6 +53,8 @@ set(sources
 	src/gui/LabelledSlider.cpp
 	src/gui/CameraView.h
 	src/gui/CameraView.cpp
+	src/gui/ThumbnailDialog.h
+	src/gui/ThumbnailDialog.cpp
 	
 	src/gfx/Volume.h
 	src/gfx/Volume.cpp

@@ -47,6 +47,9 @@ public slots:
 	
 private:
 
+	//Input events
+	void mousePressEvent(QMouseEvent* event) override;
+
 	float m_scaleFactor = 1.0f;
 	VolumeAxis m_axis = VolumeAxis::XAxis;
 	Volume::IndexType m_index = 0;
