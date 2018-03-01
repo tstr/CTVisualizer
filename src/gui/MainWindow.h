@@ -5,13 +5,13 @@
 
 #include <QMainWindow>
 
-#include "gfx/Camera.h"
 #include "gfx/VolumeRender.h"
 
 class QLabel;
 class QCheckBox;
 class LabelledSlider;
 class SubimageView;
+class CameraView;
 
 class MainWindow : public QMainWindow
 {
@@ -28,7 +28,6 @@ private slots:
 		Update image views
 	*/
 	void scaleImages(int value);
-	void updateCamera(const QMatrix4x4& matrix);
 
 private:
 
@@ -40,8 +39,6 @@ private:
 
 	//Volume viewer
 	VolumeRender m_render;
-	//3D camera
-	ArcballCamera m_camera;
 
 	//View sliders
 	LabelledSlider* m_zSlider;
@@ -55,14 +52,11 @@ private:
 	SubimageView* m_ySubimage;
 	SubimageView* m_zSubimage;
 
-	LabelledSlider* m_rotationXSlider;
-	LabelledSlider* m_rotationYSlider;
-
 	//histogram equalization toggle
 	QCheckBox* m_heToggle;
 	//mip toggle
 	QCheckBox* m_mipToggle;
 
 	//3D
-	QLabel* m_3DView;
+	CameraView* m_3DView;
 };

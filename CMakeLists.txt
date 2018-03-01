@@ -51,6 +51,8 @@ set(sources
 	src/gui/SubimageView.cpp
 	src/gui/LabelledSlider.h
 	src/gui/LabelledSlider.cpp
+	src/gui/CameraView.h
+	src/gui/CameraView.cpp
 	
 	src/gfx/Volume.h
 	src/gfx/Volume.cpp
@@ -63,7 +65,6 @@ set(sources
     src/gfx/PixmapDrawer.h
 	src/gfx/HistogramEqualization.h
 	src/gfx/HistogramEqualization.cpp
-	src/gfx/Camera.h
 	src/gfx/RayCasting.h
 	src/gfx/RayCasting.cpp
 

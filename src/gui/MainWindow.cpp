@@ -4,11 +4,13 @@
 
 #include <QtWidgets>
 
-#include "gfx/VolumeRender.h"
-#include "gui/LabelledSlider.h"
-
 #include "MainWindow.h"
+
+#include "gfx/VolumeRender.h"
+
 #include "SubimageView.h"
+#include "CameraView.h"
+#include "LabelledSlider.h"
 
 enum Constants
 {
@@ -16,8 +18,6 @@ enum Constants
 	IMAGE_SCALE_MAX = 200,
 	CTRL_WIDGET_WIDTH_MIN = 400,
 	CTRL_WIDGET_WIDTH_MAX = 400,
-	CAMERA_WIDTH = 256,
-	CAMERA_HEIGHT = 256
 };
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -50,13 +50,6 @@ void MainWindow::scaleImages(int value)
 	m_zSubimage->setScale(scaleFactor);
 
 	m_render.redrawAll();
-}
-
-void MainWindow::updateCamera(const QMatrix4x4& matrix)
-{
-	m_3DView->setPixmap(
-		m_render.draw3D(CAMERA_WIDTH, CAMERA_HEIGHT, matrix)
-	);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -100,20 +93,6 @@ QWidget* MainWindow::createWidgets()
 	m_zSlider->setSliderPosition((int)m_render.volume()->sizeZ() / 2);
 	
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	/*
-		3D Events
-	*/
-
-	m_rotationXSlider->setSliderPosition(0);
-	m_rotationYSlider->setSliderPosition(0);
-
-	connect(m_rotationXSlider, &LabelledSlider::valueChanged, &m_camera, &ArcballCamera::setRotationX);
-	connect(m_rotationYSlider, &LabelledSlider::valueChanged, &m_camera, &ArcballCamera::setRotationY);
-	connect(&m_camera, &ArcballCamera::cameraUpdated, this, &MainWindow::updateCamera);
-	
-	updateCamera(QMatrix4x4());
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	//Central widget
 	QWidget* center = new QWidget(this);
@@ -125,11 +104,10 @@ QWidget* MainWindow::createWidgets()
 
 QWidget* MainWindow::create3DArea()
 {
-	m_3DView = new QLabel(this);
-	m_3DView->setText("test label");
-	m_3DView->setAlignment(Qt::AlignCenter);
+	//3D camera widget
+	m_3DView = new CameraView(&m_render, this);
 
-	QVBoxLayout* layout = new QVBoxLayout();
+	QVBoxLayout* layout = new QVBoxLayout(this);
 	layout->addWidget(m_3DView);
 	
 	QFrame* area = new QFrame(this);
@@ -189,11 +167,6 @@ QWidget* MainWindow::createControlArea()
 	m_scaleSlider->setRange(IMAGE_SCALE_MIN, IMAGE_SCALE_MAX);
 	m_scaleSlider->setValue(100);
 
-	m_rotationXSlider = new LabelledSlider(this);
-	m_rotationXSlider->setRange(0, 360);
-	m_rotationYSlider = new LabelledSlider(this);
-	m_rotationYSlider->setRange(0, 360);
-
 	m_mipToggle = new QCheckBox(QStringLiteral("Maximum Intensity Projection"), this);
 	m_heToggle = new QCheckBox(QStringLiteral("Histogram Equalization"), this);
 
@@ -204,9 +177,6 @@ QWidget* MainWindow::createControlArea()
 	ctrlLayout->addRow(QStringLiteral("Scale(%)"), m_scaleSlider);
 	ctrlLayout->addWidget(m_mipToggle);
 	ctrlLayout->addWidget(m_heToggle);
-	ctrlLayout->addWidget(new QSplitter(this));
-	ctrlLayout->addRow(QStringLiteral("X rotation:"), m_rotationXSlider);
-	ctrlLayout->addRow(QStringLiteral("Y rotation:"), m_rotationYSlider);
 
 	QGroupBox* ctrlGroup = new QGroupBox(QStringLiteral("CT Viewer"), this);
 	ctrlGroup->setLayout(ctrlLayout);
