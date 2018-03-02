@@ -1,7 +1,7 @@
 /*
 	Image buffer class:
 
-	Represents an 8bit grey scale image
+	Represents an 8bit grey scale image.
 */
 
 #pragma once

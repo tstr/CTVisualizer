@@ -131,7 +131,7 @@ public:
 	operator bool() const { return hit(); }
 
 	/*
-		No hit
+		No hit static helper
 	*/
 	static RaycastResult nohit()
 	{

@@ -1,5 +1,7 @@
 /*
 	Main Application Window class
+
+	Root of the application GUI.
 */
 #pragma once
 

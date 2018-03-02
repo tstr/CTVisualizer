@@ -58,27 +58,13 @@ public:
 
 	VolumeSubimageRange(const Volume* volume, VolumeAxis axis) :
 		m_begin(volume, 0, axis),
-		m_end(volume, getLength(volume, axis), axis)
+		m_end(volume, volume->axisSize(axis), axis)
 	{}
 	
 	iterator begin() const { return iterator(m_begin); }
 	iterator end() const { return iterator(m_end); }
 
 private:
-
-	//Helper function returns the length of an axis
-	inline Volume::SizeType getLength(const Volume* volume, VolumeAxis axis) const
-	{
-		//Direct address table
-		const Volume::SizeType lengths[] =
-		{
-			volume->sizeX(),
-			volume->sizeY(),
-			volume->sizeZ()
-		};
-
-		return lengths[axis];
-	}
 
 	VolumeSubimage m_begin;
 	VolumeSubimage m_end;

@@ -1,9 +1,9 @@
 /*
 	Volume class:
 
-	Represents a 3D volume image
+	Represents a 3D image
 
-	data encoded as 16 bit integer value
+	data encoded as 16 bit signed integer values
 
 	 y
   	 |

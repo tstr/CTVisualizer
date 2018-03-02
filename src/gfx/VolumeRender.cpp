@@ -21,7 +21,7 @@ VolumeRender::VolumeRender(Volume& volume, QObject* parent) :
 	m_volume(std::move(volume)),
 	m_histogramMapper(&m_volume),
 	m_simpleMapper(&m_volume),
-	m_sampleFrequency(100)
+	m_sampleFrequency(125)
 {
 	//Set default colour mapping table
 	m_mapper = &m_simpleMapper;
@@ -82,6 +82,7 @@ void VolumeRender::setSamplingType(SamplingType type)
 		&BicubicSampler::sample
 	};
 
+	//Choose sampling function
 	m_samplerFunc = funcs[type];
 
 	redraw2D();

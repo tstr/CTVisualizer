@@ -1,5 +1,8 @@
 /*
 	3D Camera View widget
+
+	Represents a 3D view onto a Volume.
+	The view can be changed by clicking and dragging with the left mouse button.
 */
 
 #pragma once

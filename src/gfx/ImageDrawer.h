@@ -1,9 +1,8 @@
 /*
-	Pixmap drawing class for filling pixmaps procedurally
+	Image drawing class
 */
 #pragma once
 
-#include <QImage>
 #include <QtConcurrentMap>
 
 #include "util/CountingIterator.h"
@@ -14,9 +13,11 @@ class ImageDrawer
 public:
 
 	/*
-		Construct a Pixmap of size w x h where each pixel is computed from a given pixel function.
+		Apply a given pixel function for every pixel in a target image.
 
-		Pixel function must take a UV as an argument and return a byte value
+		A pixel function in this case is analagous to a pixel/fragment shader:
+		The input is the normalized texture coordinates of the destination pixel.
+		The output is an 8 bit colour value.
 	*/
 	template<typename PixelFunc>
 	static void dispatch(ImageBuffer& target, const PixelFunc& pixel)
@@ -24,10 +25,11 @@ public:
 		//Per-pixel procedure
 		auto proc = [&](size_t n) {
 
+			//Get coordinates from counting value
 			const quint32 i = (quint32)n % target.width();
 			const quint32 j = (quint32)n / target.width();
 
-			//Relative texture coordinates
+			//Normalized texture coordinates
 			const auto u = (float)i / target.width();
 			const auto v = (float)j / target.height();
 
@@ -35,6 +37,7 @@ public:
 			target.at(i, j) = pixel(UV(u, v));
 		};
 
+		//Optionally parallelism can be disabled when this macro is defined
 #ifdef NO_PARALLEL_PIXEL_FUNC
 
 		//Sequential foreach

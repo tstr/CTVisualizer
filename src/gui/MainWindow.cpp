@@ -222,7 +222,7 @@ QWidget* MainWindow::createControlArea()
 	ctrlLayout->addWidget(new QLabel(QStringLiteral("Raycast Sample Frequency:")));
 	m_3DSampleSlider = new LabelledSlider(this);
 	m_3DSampleSlider->setRange(RAYCAST_FREQUENCY_MIN, RAYCAST_FREQUENCY_MAX);
-	m_3DSampleSlider->setSliderPosition(100);
+	m_3DSampleSlider->setSliderPosition(125);
 	ctrlLayout->addWidget(m_3DSampleSlider);
 
 	QGroupBox* ctrlArea = new QGroupBox(QStringLiteral("Options"), this);

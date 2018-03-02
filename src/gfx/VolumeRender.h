@@ -26,19 +26,20 @@ class VolumeRender : public QObject
 {
 	Q_OBJECT
 	Q_DISABLE_COPY(VolumeRender)
-	//Render states
+
+	//Render state properties
 	Q_PROPERTY(bool hist READ histEnabled WRITE enableHist) // Histogram equalization
 	Q_PROPERTY(SamplingType sampling READ getSamplingType WRITE setSamplingType)
 	Q_PROPERTY(quint32 sampleFrequency READ getSampleFrequency WRITE setSampleFrequency)
 
 public:
 
-	//////////////////////////////////////////////////////////////////////////////////
-
 	/*
 		Construct a volume viewer
 	*/
 	explicit VolumeRender(Volume& volume, QObject* parent = nullptr);
+
+	//////////////////////////////////////////////////////////////////////////////////
 
 	/*
 		Draw a single subimage
@@ -55,12 +56,13 @@ public:
 	*/
 	void draw3D(ImageBuffer& target, const QMatrix4x4& modelView);
 
+	//////////////////////////////////////////////////////////////////////////////////
+
 	/*
-		Get volume data
+		Get volume
 	*/
 	const Volume* volume() const { return &m_volume; }
 
-	
 	/*
 		Properties
 	*/
@@ -79,6 +81,7 @@ public slots:
 
 	//Set the sampling type
 	void setSamplingType(SamplingType type);
+
 	//Enable specific sampling types
 	void setSamplingTypeBasic() { setSamplingType(SamplingBasic); }
 	void setSamplingTypeBilinear() { setSamplingType(SamplingBilinear); }

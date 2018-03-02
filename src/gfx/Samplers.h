@@ -3,11 +3,7 @@
 
 	Contains a set of functions for sampling both Volumes and 2D images.
 
-	2D images can be any generic type as long as they implement 3 methods:
-		- quint16 at(quint32 u, quint32 v) const
-		- quint32 width() const
-		- quint32 height() const
-	The arguments u, v for the method at() must be less than width() and height() respectively.
+	UV(W) coordinates are used, where each component is a normalized value.
 */
 
 #pragma once
@@ -258,6 +254,7 @@ public:
 			{ sm(xmin - 1, ymax + 1), sm(xmin, ymax + 1), sm(xmax, ymax + 1), sm(xmax + 1, ymax + 1) },
 		};
 
+		//Interpolate 4 control point rows
 		float results[] = {
 			interp(points[0], xgradient),
 			interp(points[1], xgradient),
@@ -318,6 +315,7 @@ public:
 			}
 		};
 
+		//Interpolate in all dimensions
 		return lerp(
 			lerp(
 				lerp(v[0][0][0], v[0][0][1], xgradient),

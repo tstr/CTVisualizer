@@ -1,5 +1,5 @@
 /*
-	Labelled slider class
+	Labelled slider helper class
 
 	Identical to QSlider but min/max/current values are labelled.
 	Can only be used in a horizontal orientation.
