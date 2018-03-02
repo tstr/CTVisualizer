@@ -20,6 +20,8 @@ enum Constants
 	CTRL_WIDGET_WIDTH_MAX = 400,
 	RAYCAST_FREQUENCY_MIN = 10,
 	RAYCAST_FREQUENCY_MAX = 400,
+	WINDOW_DEFAULT_WIDTH = 1064,
+	WINDOW_DEFAULT_HEIGHT = 720
 };
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -29,7 +31,7 @@ MainWindow::MainWindow(Volume& volume, QWidget *parent) :
 	m_render(volume)
 {
 	setWindowTitle(QStringLiteral("CT Viewer"));
-	//resize(QSize(1280, 720));
+	resize(QSize(WINDOW_DEFAULT_WIDTH, WINDOW_DEFAULT_HEIGHT));
 	setCentralWidget(createWidgets());
 }
 
@@ -130,17 +132,15 @@ QWidget* MainWindow::createImageArea()
 	imageLayout->addWidget(m_xSubimage, 1, 0);
 	imageLayout->addWidget(m_3DView,    1, 1);
 
-	QGroupBox* area = new QGroupBox(QStringLiteral("Image Views:"), this);
-	//QFrame* area = new QFrame(this);
-	area->setLayout(imageLayout);
+	QWidget* viewport = new QWidget(this);
+	viewport->setLayout(imageLayout);
 
-	//Set background colour
-	//QPalette pal(palette());
-	//pal.setColor(QPalette::Background, Qt::gray);
-	//area->setAutoFillBackground(true);
-	//area->setPalette(pal);
+	QScrollArea* scroll = new QScrollArea(this);
+	//scroll->setWidget(scrollWidget);
+	scroll->setWidgetResizable(true);
+	scroll->setWidget(viewport);
 
-	return area;
+	return scroll;
 }
 
 QWidget* MainWindow::createControlArea()
