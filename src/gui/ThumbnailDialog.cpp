@@ -97,7 +97,7 @@ void ThumbnailDialog::clicked(QListWidgetItem* item)
 
 	QDialog* imageDialog = new QDialog(this);
 	imageDialog->setAttribute(Qt::WA_DeleteOnClose);
-	imageDialog->setModal(true);
+	//imageDialog->setModal(true);
 	imageDialog->setWindowTitle(QStringLiteral("Index: ") + QString::number(index));
 
 	//Draw closeup of subimage
