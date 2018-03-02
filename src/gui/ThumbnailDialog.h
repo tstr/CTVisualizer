@@ -24,8 +24,15 @@ public:
 	*/
 	explicit ThumbnailDialog(VolumeRender* render, VolumeAxis axis, QWidget* parent = nullptr);
 
+private slots:
+
+	void clicked(QListWidgetItem* item);
+
 private:
 
 	//Thumbnail list
 	QListWidget* m_tbList;
+	//Renderer
+	VolumeRender* m_render;
+	VolumeAxis m_axis;
 };

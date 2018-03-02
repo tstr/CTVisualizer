@@ -20,6 +20,8 @@ enum Constants
 ///////////////////////////////////////////////////////////////////////////////////////////////////////
 
 ThumbnailDialog::ThumbnailDialog(VolumeRender* render, VolumeAxis axis, QWidget* parent) :
+	m_render(render),
+	m_axis(axis),
 	QDialog(parent)
 {
 	Q_ASSERT(render != nullptr);
@@ -71,7 +73,43 @@ ThumbnailDialog::ThumbnailDialog(VolumeRender* render, VolumeAxis axis, QWidget*
 		QStringLiteral("Z Subimages")
 	};
 
+	//Connect item clicked event
+	connect(m_tbList, &QListWidget::itemClicked, this, &ThumbnailDialog::clicked);
+
 	QDialog::setWindowTitle(axisLabels[axis]);
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////
+
+/*
+	On widget item selected.
+
+	Create a subdialog showing a closeup of the image.
+*/
+void ThumbnailDialog::clicked(QListWidgetItem* item)
+{
+	Q_ASSERT(item != nullptr);
+
+	//Get slice index
+	quint32 index = item->text().toUInt();
+
+	ImageBuffer target(720, 720);
+
+	QDialog* imageDialog = new QDialog(this);
+	imageDialog->setAttribute(Qt::WA_DeleteOnClose);
+	imageDialog->setModal(true);
+	imageDialog->setWindowTitle(QStringLiteral("Index: ") + QString::number(index));
+
+	//Draw closeup of subimage
+	m_render->drawSubimage(target, index, m_axis);
+
+	//Set pixmap
+	QLabel* imageLabel = new QLabel(imageDialog);
+	imageLabel->setPixmap(target.toPixmap());
+	imageDialog->setLayout(new QVBoxLayout(imageDialog));
+	imageDialog->layout()->addWidget(imageLabel);
+
+	imageDialog->show();
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////
