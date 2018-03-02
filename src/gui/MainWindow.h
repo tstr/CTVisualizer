@@ -39,7 +39,6 @@ private:
 	QWidget* createWidgets();
 	QWidget* createControlArea();
 	QWidget* createImageArea();
-	QWidget* create3DArea();
 
 	//Volume viewer
 	VolumeRender m_render;
@@ -61,8 +60,8 @@ private:
 	//mip toggle
 	QCheckBox* m_mipToggle;
 
-	//Sampler options
-	QRadioButton* m_samplerDefault;
+	//2D sampler options
+	QRadioButton* m_samplerBasic;
 	QRadioButton* m_samplerBilinear;
 	QRadioButton* m_samplerBicubic;
 
@@ -70,4 +69,7 @@ private:
 	CameraView* m_3DView;
 	//3D - sampling frequency slider
 	LabelledSlider* m_3DSampleSlider;
+	//3D sampler options
+	QRadioButton* m_samplerBasic3D;
+	QRadioButton* m_samplerTrilinear;
 };

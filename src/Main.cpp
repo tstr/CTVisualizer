@@ -6,6 +6,7 @@
 #include <QMessageBox>
 #include <QFile>
 #include <QStyleFactory>
+#include <QDesktopWidget>
 #include <QSettings>
 
 #include "gui/MainWindow.h"
@@ -50,6 +51,11 @@ int main(int argc, char* argv[])
 	//Construct Volume viewer
 	MainWindow window(v);
 
+	//Move to center
+	QRect r = window.geometry();
+	r.moveCenter(QApplication::desktop()->availableGeometry().center());
+	window.setGeometry(r);
+	
 	//Show main window
 	window.show();
 

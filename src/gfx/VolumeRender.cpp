@@ -26,70 +26,13 @@ VolumeRender::VolumeRender(Volume& volume, QObject* parent) :
 	//Set default colour mapping table
 	m_mapper = &m_simpleMapper;
 
-	//Set default sampling function
-	m_samplerFunc = &BilinearSampler::sample;
+	//Set default sampling functions
+	setSamplingTypeBilinear();   //2D
+	setSamplingTypeTrilinear();  //3D
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Render states
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-bool VolumeRender::histEnabled() const
-{
-	return m_mapper == &m_histogramMapper;
-}
-
-void VolumeRender::enableHist(bool enable)
-{
-	//Change colour mapping table
-	if (enable)
-	{
-		//Histogram equalization
-		m_mapper = &m_histogramMapper;
-	}
-	else
-	{
-		//Simple normalization
-		m_mapper = &m_simpleMapper;
-	}
-
-	emit redraw2D();
-}
-
-SamplingType VolumeRender::getSamplingType() const
-{
-	//Is nearest neighbour sampler
-	if (m_samplerFunc == (SamplerFunc2D)&BasicSampler::sample)
-		return SamplingBasic;
-
-	//Is bilinear sampler
-	if (m_samplerFunc == &BilinearSampler::sample)
-		return SamplingBilinear;
-
-	//Is bicubic sampler
-	if (m_samplerFunc == &BicubicSampler::sample)
-		return SamplingBicubic;
-
-	return SamplingBasic;
-}
-
-void VolumeRender::setSamplingType(SamplingType type)
-{
-	SamplerFunc2D funcs[] =
-	{
-		&BasicSampler::sample,
-		&BilinearSampler::sample,
-		&BicubicSampler::sample
-	};
-
-	//Choose sampling function
-	m_samplerFunc = funcs[type];
-
-	redraw2D();
-}
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Drawing function
+// Drawing functions
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void VolumeRender::drawSubimage(ImageBuffer& target, Volume::IndexType index, VolumeAxis axis)
@@ -121,10 +64,6 @@ void VolumeRender::drawSubimageMIP(ImageBuffer& target, VolumeAxis axis)
 		return m_mapper->normalize(max);
 	});
 }
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//	3D
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void VolumeRender::draw3D(ImageBuffer& target, const QMatrix4x4& modelView)
 {
@@ -159,11 +98,93 @@ void VolumeRender::draw3D(ImageBuffer& target, const QMatrix4x4& modelView)
 		for (const QVector3D& pos : raycast)
 		{
 			//Maximum intensity projection
-			max = std::max(max, TrilinearSampler::sample(m_volume, pos));
+			max = std::max(max, m_samplerFunc3D(m_volume, pos));
 		}
 
 		return m_simpleMapper.normalize(max);
 	});
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Render states
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+bool VolumeRender::histEnabled() const
+{
+	return m_mapper == &m_histogramMapper;
+}
+
+void VolumeRender::enableHist(bool enable)
+{
+	//Change colour mapping table
+	if (enable)
+	{
+		//Histogram equalization
+		m_mapper = &m_histogramMapper;
+	}
+	else
+	{
+		//Simple normalization
+		m_mapper = &m_simpleMapper;
+	}
+
+	emit redraw2D();
+}
+
+SamplerType2D VolumeRender::getSamplingType() const
+{
+	//Is nearest neighbour sampler
+	if (m_samplerFunc == (SamplerFunc2D)&BasicSampler::sample)
+		return SamplingBasic;
+
+	//Is bilinear sampler
+	if (m_samplerFunc == &BilinearSampler::sample)
+		return SamplingBilinear;
+
+	//Is bicubic sampler
+	if (m_samplerFunc == &BicubicSampler::sample)
+		return SamplingBicubic;
+
+	return SamplingBasic;
+}
+
+SamplerType3D VolumeRender::getSamplingType3D() const
+{
+	if (m_samplerFunc3D == (SamplerFunc3D)&BasicSampler::sample)
+		return SamplingBasic3D;
+
+	if (m_samplerFunc3D == &TrilinearSampler::sample)
+		return SamplingTrilinear;
+
+	return SamplingBasic3D;
+}
+
+void VolumeRender::setSamplingType(SamplerType2D type)
+{
+	SamplerFunc2D funcs[] =
+	{
+		&BasicSampler::sample,
+		&BilinearSampler::sample,
+		&BicubicSampler::sample
+	};
+
+	//Choose sampling function
+	m_samplerFunc = funcs[type];
+
+	redraw2D();
+}
+
+void VolumeRender::setSamplingType3D(SamplerType3D type)
+{
+	SamplerFunc3D funcs[] =
+	{
+		&BasicSampler::sample,
+		&TrilinearSampler::sample
+	};
+
+	m_samplerFunc3D = funcs[type];
+
+	redraw3D();
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

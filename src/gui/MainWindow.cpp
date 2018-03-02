@@ -28,8 +28,8 @@ MainWindow::MainWindow(Volume& volume, QWidget *parent) :
 	QMainWindow(parent),
 	m_render(volume)
 {
-	setWindowTitle(QStringLiteral("title"));
-	resize(QSize(1280, 720));
+	setWindowTitle(QStringLiteral("CT Viewer"));
+	//resize(QSize(1280, 720));
 	setCentralWidget(createWidgets());
 }
 
@@ -59,15 +59,14 @@ void MainWindow::scaleImages(int value)
 QWidget* MainWindow::createWidgets()
 {
 	//Central widget layout
-	QHBoxLayout *layout = new QHBoxLayout(this);
-	layout->addWidget(createControlArea());
-	layout->addWidget(createImageArea());
-	layout->addWidget(create3DArea());
+	QWidget* center = new QWidget(this);
+	center->setLayout(new QHBoxLayout(center));
+	center->layout()->addWidget(createControlArea());
+	center->layout()->addWidget(createImageArea());
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	/*
-		Events
-	*/
+	//	Setup signals/slots
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	//Connect sliders
 	connect(m_xSlider, &QSlider::valueChanged, m_xSubimage, &SubimageView::setIndex);
@@ -88,9 +87,12 @@ QWidget* MainWindow::createWidgets()
 	connect(m_mipToggle, &QCheckBox::toggled, m_zSlider, &QSlider::setDisabled);
 
 	//Sampling functions
-	connect(m_samplerDefault,  &QRadioButton::clicked, &m_render, &VolumeRender::setSamplingTypeBasic);
+	connect(m_samplerBasic,  &QRadioButton::clicked, &m_render, &VolumeRender::setSamplingTypeBasic);
 	connect(m_samplerBilinear, &QRadioButton::clicked, &m_render, &VolumeRender::setSamplingTypeBilinear);
 	connect(m_samplerBicubic,  &QRadioButton::clicked, &m_render, &VolumeRender::setSamplingTypeBicubic);
+
+	connect(m_samplerBasic3D, &QRadioButton::clicked, &m_render, &VolumeRender::setSamplingType3DBasic);
+	connect(m_samplerTrilinear, &QRadioButton::clicked, &m_render, &VolumeRender::setSamplingTypeTrilinear);
 
 	//3D sample frequency slider
 	connect(m_3DSampleSlider, &LabelledSlider::valueChanged, &m_render, &VolumeRender::setSampleFrequency);
@@ -108,32 +110,7 @@ QWidget* MainWindow::createWidgets()
 	
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	//Central widget
-	QWidget* center = new QWidget(this);
-	center->setLayout(layout);
-
 	return center;
-}
-
-
-QWidget* MainWindow::create3DArea()
-{
-	//3D camera widget
-	m_3DView = new CameraView(&m_render, this);
-
-	QVBoxLayout* layout = new QVBoxLayout(this);
-	layout->addWidget(m_3DView);
-	
-	QFrame* area = new QFrame(this);
-	area->setLayout(layout);
-
-	//Set background colour
-	QPalette pal(palette());
-	pal.setColor(QPalette::Background, Qt::gray);
-	area->setAutoFillBackground(true);
-	area->setPalette(pal);
-
-	return area;
 }
 
 QWidget* MainWindow::createImageArea()
@@ -143,26 +120,33 @@ QWidget* MainWindow::createImageArea()
 	m_ySubimage = new SubimageView(&m_render, VolumeAxis::YAxis, 0, this);
 	m_zSubimage = new SubimageView(&m_render, VolumeAxis::ZAxis, 0, this);
 
+	//3D view
+	m_3DView = new CameraView(&m_render, this);
+
 	//Image grid
 	QGridLayout* imageLayout = new QGridLayout(this);
 	imageLayout->addWidget(m_zSubimage, 0, 0);
 	imageLayout->addWidget(m_ySubimage, 0, 1);
 	imageLayout->addWidget(m_xSubimage, 1, 0);
+	imageLayout->addWidget(m_3DView,    1, 1);
 
-	QFrame* area = new QFrame(this);
+	QGroupBox* area = new QGroupBox(QStringLiteral("Image Views:"), this);
+	//QFrame* area = new QFrame(this);
 	area->setLayout(imageLayout);
 
 	//Set background colour
-	QPalette pal(palette());
-	pal.setColor(QPalette::Background, Qt::gray);
-	area->setAutoFillBackground(true);
-	area->setPalette(pal);
+	//QPalette pal(palette());
+	//pal.setColor(QPalette::Background, Qt::gray);
+	//area->setAutoFillBackground(true);
+	//area->setPalette(pal);
 
 	return area;
 }
 
 QWidget* MainWindow::createControlArea()
 {
+	///////////////////////////////////////////////////////////////////////////////////////////////////
+	// Slider widgets
 	///////////////////////////////////////////////////////////////////////////////////////////////////
 
 	//X view
@@ -180,23 +164,36 @@ QWidget* MainWindow::createControlArea()
 	m_scaleSlider->setValue(100);
 
 	///////////////////////////////////////////////////////////////////////////////////////////////////
+	// Render state widgets
+	///////////////////////////////////////////////////////////////////////////////////////////////////
 
 	m_mipToggle = new QCheckBox(QStringLiteral("Maximum Intensity Projection"), this);
 	m_heToggle = new QCheckBox(QStringLiteral("Histogram Equalization"), this);
 
-	QGroupBox* samplerGroup = new QGroupBox(QStringLiteral("2D Sampler Function:"), this);
+	//2D sampler functions
+	QGroupBox* samplerGroup2D = new QGroupBox(QStringLiteral("2D Sampler Function:"), this);
 
-	m_samplerDefault = new QRadioButton(QStringLiteral("Nearest-Neighbour"), samplerGroup);
-	m_samplerBilinear = new QRadioButton(QStringLiteral("Bilinear"), samplerGroup);
-	m_samplerBicubic = new QRadioButton(QStringLiteral("Bicubic"), samplerGroup);
+	m_samplerBasic = new QRadioButton(QStringLiteral("Nearest-Neighbour"), samplerGroup2D);
+	m_samplerBilinear = new QRadioButton(QStringLiteral("Bilinear"), samplerGroup2D);
+	m_samplerBicubic = new QRadioButton(QStringLiteral("Bicubic"), samplerGroup2D);
 	m_samplerBilinear->setChecked(true);
 
-	QVBoxLayout* samplerLayout = new QVBoxLayout();
-	samplerLayout->addWidget(m_samplerDefault);
-	samplerLayout->addWidget(m_samplerBilinear);
-	samplerLayout->addWidget(m_samplerBicubic);
+	samplerGroup2D->setLayout(new QVBoxLayout(samplerGroup2D));
+	samplerGroup2D->layout()->addWidget(m_samplerBasic);
+	samplerGroup2D->layout()->addWidget(m_samplerBilinear);
+	samplerGroup2D->layout()->addWidget(m_samplerBicubic);
 
-	samplerGroup->setLayout(samplerLayout);
+
+	//3D sampler functions
+	QGroupBox* samplerGroup3D = new QGroupBox(QStringLiteral("3D Sampler Function:"), this);
+
+	m_samplerBasic3D = new QRadioButton(QStringLiteral("Nearest-Neighbour"), samplerGroup3D);
+	m_samplerTrilinear = new QRadioButton(QStringLiteral("Trilinear"), samplerGroup3D);
+	m_samplerTrilinear->setChecked(true);
+
+	samplerGroup3D->setLayout(new QVBoxLayout(samplerGroup3D));
+	samplerGroup3D->layout()->addWidget(m_samplerBasic3D);
+	samplerGroup3D->layout()->addWidget(m_samplerTrilinear);
 
 	///////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -216,16 +213,18 @@ QWidget* MainWindow::createControlArea()
 	ctrlLayout->addWidget(m_mipToggle);
 	ctrlLayout->addWidget(m_heToggle);
 	ctrlLayout->addWidget(new QSplitter(this));
-	ctrlLayout->addWidget(samplerGroup);
+	ctrlLayout->addWidget(samplerGroup2D);
 	ctrlLayout->addWidget(new QSplitter(this));
 
+	//3D options
+	ctrlLayout->addWidget(samplerGroup3D);
 	ctrlLayout->addWidget(new QLabel(QStringLiteral("Raycast Sample Frequency:")));
 	m_3DSampleSlider = new LabelledSlider(this);
 	m_3DSampleSlider->setRange(RAYCAST_FREQUENCY_MIN, RAYCAST_FREQUENCY_MAX);
 	m_3DSampleSlider->setSliderPosition(125);
 	ctrlLayout->addWidget(m_3DSampleSlider);
 
-	QGroupBox* ctrlArea = new QGroupBox(QStringLiteral("Options"), this);
+	QGroupBox* ctrlArea = new QGroupBox(QStringLiteral("Options:"), this);
 	ctrlArea->setLayout(ctrlLayout);
 	ctrlArea->setMaximumWidth(CTRL_WIDGET_WIDTH_MAX);
 	ctrlArea->setMinimumWidth(CTRL_WIDGET_WIDTH_MIN);

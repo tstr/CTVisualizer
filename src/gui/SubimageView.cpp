@@ -21,7 +21,7 @@ SubimageView::SubimageView(VolumeRender* render, VolumeAxis axis, Volume::IndexT
 	QWidget::setLayout(&m_layout);
 
 	m_image.setAlignment(Qt::AlignCenter);
-	m_imageLabel.setAlignment(Qt::AlignTop);
+	m_imageLabel.setAlignment(Qt::AlignTop | Qt::AlignHCenter);
 
 	//Figure out scaled width/height for given axis
 	auto v = m_render->volume();

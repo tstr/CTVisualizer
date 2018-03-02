@@ -8,12 +8,11 @@
 #pragma once
 
 #include <QLabel>
-#include <QVBoxLayout>
 #include <QMatrix4x4>
 
 #include "gfx/VolumeRender.h"
 
-class CameraView : public QWidget
+class CameraView : public QLabel
 {
 	Q_OBJECT
 	Q_DISABLE_COPY(CameraView)
@@ -46,9 +45,6 @@ private:
 	//View dimensions
 	quint32 m_width;
 	quint32 m_height;
-
-	QLabel m_image;
-	QVBoxLayout m_layout;
 
 	ImageBuffer m_buffer;
 	

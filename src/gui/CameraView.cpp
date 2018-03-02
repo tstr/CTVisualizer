@@ -12,15 +12,12 @@ CameraView::CameraView(VolumeRender* render, QWidget* parent) :
 	m_render(render),
 	m_width(300),
 	m_height(300),
-	QWidget(parent)
+	QLabel(parent)
 {
 	Q_ASSERT(m_render != nullptr);
 
-	m_image.setAlignment(Qt::AlignCenter);
-
 	//Setup image widget
-	m_layout.addWidget(&m_image);
-	QWidget::setLayout(&m_layout);
+	QLabel::setAlignment(Qt::AlignCenter);
 	QWidget::setFixedSize(m_width, m_height);
 
 	//default direction
@@ -35,7 +32,7 @@ CameraView::CameraView(VolumeRender* render, QWidget* parent) :
 */
 void CameraView::redraw()
 {
-	//Resize buffer if necessary
+	//Prepare buffer
 	m_buffer.realloc(m_width, m_height);
 
 	//Scaling matrix
@@ -46,7 +43,7 @@ void CameraView::redraw()
 	m_render->draw3D(m_buffer, m_viewMatrix * scaling);
 
 	//Present view
-	m_image.setPixmap(m_buffer.toPixmap());
+	QLabel::setPixmap(m_buffer.toPixmap());
 }
 
 QVector3D CameraView::mapToSphere(const QPointF& point)
