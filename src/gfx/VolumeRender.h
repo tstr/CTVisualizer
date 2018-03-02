@@ -29,6 +29,7 @@ class VolumeRender : public QObject
 	//Render states
 	Q_PROPERTY(bool hist READ histEnabled WRITE enableHist) // Histogram equalization
 	Q_PROPERTY(SamplingType sampling READ getSamplingType WRITE setSamplingType)
+	Q_PROPERTY(quint32 sampleFrequency READ getSampleFrequency WRITE setSampleFrequency)
 
 public:
 
@@ -59,7 +60,7 @@ public:
 	*/
 	const Volume* volume() const { return &m_volume; }
 
-	//////////////////////////////////////////////////////////////////////////////////
+	
 	/*
 		Properties
 	*/
@@ -68,17 +69,23 @@ public:
 	bool histEnabled() const;
 	//Return the sampling type
 	SamplingType getSamplingType() const;
+	//Return the raycast sample frequency
+	quint32 getSampleFrequency() const { return m_sampleFrequency; }
 
 public slots:
 
 	//Set the colour mapping table to Histogram Equalization
 	void enableHist(bool enable);
+
 	//Set the sampling type
 	void setSamplingType(SamplingType type);
 	//Enable specific sampling types
 	void setSamplingTypeBasic() { setSamplingType(SamplingBasic); }
 	void setSamplingTypeBilinear() { setSamplingType(SamplingBilinear); }
 	void setSamplingTypeBicubic() { setSamplingType(SamplingBicubic); }
+
+	//Set the raycast sampling frequency
+	void setSampleFrequency(quint32 frequency) { m_sampleFrequency = frequency; redraw3D(); }
 
 signals:
 
@@ -93,9 +100,13 @@ private:
 	//Sampling function
 	SamplerFunc2D m_samplerFunc;
 
+	//Raycast sample frequency
+	quint32 m_sampleFrequency;
+
 	//Colour mapping tables
 	HistogramEqualizer m_histogramMapper;
 	SimpleEqualizer m_simpleMapper;
+
 	//Current colour mapping table
 	const MappingTable* m_mapper;
 };

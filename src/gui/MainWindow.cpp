@@ -18,6 +18,8 @@ enum Constants
 	IMAGE_SCALE_MAX = 200,
 	CTRL_WIDGET_WIDTH_MIN = 400,
 	CTRL_WIDGET_WIDTH_MAX = 400,
+	RAYCAST_FREQUENCY_MIN = 10,
+	RAYCAST_FREQUENCY_MAX = 400,
 };
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -89,6 +91,9 @@ QWidget* MainWindow::createWidgets()
 	connect(m_samplerDefault,  &QRadioButton::clicked, &m_render, &VolumeRender::setSamplingTypeBasic);
 	connect(m_samplerBilinear, &QRadioButton::clicked, &m_render, &VolumeRender::setSamplingTypeBilinear);
 	connect(m_samplerBicubic,  &QRadioButton::clicked, &m_render, &VolumeRender::setSamplingTypeBicubic);
+
+	//3D sample frequency slider
+	connect(m_3DSampleSlider, &LabelledSlider::valueChanged, &m_render, &VolumeRender::setSampleFrequency);
 
 	//Connect redraw signals - subimage widgets are redrawn when renderer is updated
 	connect(&m_render, &VolumeRender::redraw2D, m_xSubimage, &SubimageView::redraw);
@@ -212,6 +217,13 @@ QWidget* MainWindow::createControlArea()
 	ctrlLayout->addWidget(m_heToggle);
 	ctrlLayout->addWidget(new QSplitter(this));
 	ctrlLayout->addWidget(samplerGroup);
+	ctrlLayout->addWidget(new QSplitter(this));
+
+	ctrlLayout->addWidget(new QLabel(QStringLiteral("Raycast Sample Frequency:")));
+	m_3DSampleSlider = new LabelledSlider(this);
+	m_3DSampleSlider->setRange(RAYCAST_FREQUENCY_MIN, RAYCAST_FREQUENCY_MAX);
+	m_3DSampleSlider->setSliderPosition(100);
+	ctrlLayout->addWidget(m_3DSampleSlider);
 
 	QGroupBox* ctrlArea = new QGroupBox(QStringLiteral("Options"), this);
 	ctrlArea->setLayout(ctrlLayout);

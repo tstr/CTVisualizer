@@ -66,4 +66,6 @@ private:
 
 	//3D
 	CameraView* m_3DView;
+	//3D - sampling frequency slider
+	LabelledSlider* m_3DSampleSlider;
 };

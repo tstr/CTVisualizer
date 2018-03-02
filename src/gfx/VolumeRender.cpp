@@ -20,7 +20,8 @@ VolumeRender::VolumeRender(Volume& volume, QObject* parent) :
 	QObject(parent),
 	m_volume(std::move(volume)),
 	m_histogramMapper(&m_volume),
-	m_simpleMapper(&m_volume)
+	m_simpleMapper(&m_volume),
+	m_sampleFrequency(100)
 {
 	//Set default colour mapping table
 	m_mapper = &m_simpleMapper;
@@ -150,7 +151,7 @@ void VolumeRender::draw3D(ImageBuffer& target, const QMatrix4x4& modelView)
 		RaycastResult raycast = Raycast::intersects(
 			AABB(QVector3D(0.0f, 0.0f, 0.0f), QVector3D(1.0f, 1.0f, 1.0f)),
 			ray,
-			100 //sample frequency
+			m_sampleFrequency
 		);
 
 		//Traverse volume along ray
