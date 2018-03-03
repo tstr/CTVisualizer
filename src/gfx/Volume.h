@@ -64,8 +64,8 @@ public:
 	Volume() {}
 	//Construct volume from 3D array source
 	Volume(QIODevice& volumeData, const Dimensions& dimensions);
-	//Not copyable
-	Volume(const Volume&) = delete;
+	//Copyable
+	Volume(const Volume&) = default;
 	//Moveable
 	Volume(Volume&& volume);
 

@@ -45,6 +45,7 @@ set(sources
 	config.ini
 	src/Main.cpp
 
+	# GUI
 	src/gui/MainWindow.h
 	src/gui/MainWindow.cpp
 	src/gui/SubimageView.h
@@ -56,6 +57,7 @@ set(sources
 	src/gui/ThumbnailDialog.h
 	src/gui/ThumbnailDialog.cpp
 	
+	# Graphics
 	src/gfx/Volume.h
 	src/gfx/Volume.cpp
 	src/gfx/VolumeRender.h
@@ -70,7 +72,15 @@ set(sources
 	src/gfx/HistogramEqualization.cpp
 	src/gfx/RayCasting.h
 	src/gfx/RayCasting.cpp
+	
+	# OpenGL graphics
+	src/gl/GLVolumeScene.h
+	src/gl/GLVolumeScene.cpp
+	src/gl/shaders.qrc
+	src/gl/quad.vert
+	src/gl/volume.frag
 
+	# Utilities
 	src/util/CountingIterator.h
 )
 

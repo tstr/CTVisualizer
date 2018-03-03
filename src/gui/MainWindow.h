@@ -15,6 +15,7 @@ class QRadioButton;
 class LabelledSlider;
 class SubimageView;
 class CameraView;
+class GLVolumeScene;
 
 class MainWindow : public QMainWindow
 {
@@ -72,4 +73,7 @@ private:
 	//3D sampler options
 	QRadioButton* m_samplerBasic3D;
 	QRadioButton* m_samplerTrilinear;
+
+	//OpenGL based volume renderer
+	GLVolumeScene* m_glView;
 };

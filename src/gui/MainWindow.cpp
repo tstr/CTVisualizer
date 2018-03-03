@@ -12,6 +12,8 @@
 #include "CameraView.h"
 #include "LabelledSlider.h"
 
+#include "gl/GLVolumeScene.h"
+
 enum Constants
 {
 	IMAGE_SCALE_MIN = 10,
@@ -32,7 +34,16 @@ MainWindow::MainWindow(Volume& volume, QWidget *parent) :
 {
 	setWindowTitle(QStringLiteral("CT Viewer"));
 	resize(QSize(WINDOW_DEFAULT_WIDTH, WINDOW_DEFAULT_HEIGHT));
-	setCentralWidget(createWidgets());
+
+	QTabWidget* tab = new QTabWidget(this);
+
+	QWidget* standardView = createWidgets();
+	m_glView = new GLVolumeScene(m_render.volume(), tab);
+
+	tab->addTab(standardView, QStringLiteral("Standard View"));
+	tab->addTab(m_glView, QStringLiteral("GL View"));
+
+	setCentralWidget(tab);
 }
 
 MainWindow::~MainWindow()
