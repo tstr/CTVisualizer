@@ -8,57 +8,47 @@
 
 #include "RayCasting.h"
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/*
+	min/max vector helpers
+*/
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+QVector3D min(const QVector3D& a, const QVector3D& b)
+{
+	return QVector3D(std::min(a.x(), b.x()), std::min(a.y(), b.y()), std::min(a.z(), b.z()));
+}
+
+QVector3D max(const QVector3D& a, const QVector3D& b)
+{
+	return QVector3D(std::max(a.x(), b.x()), std::max(a.y(), b.y()), std::max(a.z(), b.z()));
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 RaycastResult Raycast::intersects(const AABB& box, const Ray& ray, size_t sampleFrequency)
 {
 	using namespace std;
 
-	//Compute intersection point with x planes
-	float tmin = (box.min.x() - ray.origin.x()) / ray.dir.x();
-	float tmax = (box.max.x() - ray.origin.x()) / ray.dir.x();
+	//intersection vectors with planes
+	QVector3D tmin = (box.min - ray.origin.toVector3D()) / ray.dir;
+	QVector3D tmax = (box.max - ray.origin.toVector3D()) / ray.dir;
 
-	//Ensure tmax > tmin
-	if (tmin > tmax) swap(tmin, tmax);
+	QVector3D tnear = min(tmin, tmax);
+	QVector3D tfar = max(tmin, tmax);
 
-	//Compute intersection point with y planes
-	float tymin = (box.min.y() - ray.origin.y()) / ray.dir.y();
-	float tymax = (box.max.y() - ray.origin.y()) / ray.dir.y();
+	//entry point
+	float t0 = max(max(tnear.x(), 0.0f), max(tnear.y(), tnear.z()));
+	//exit point
+	float t1 = min(tfar.x(), min(tfar.y(), tfar.z()));
 
-	//Ensure tymax > tymin
-	if (tymin > tymax) swap(tymin, tymax);
+	//If intersects
+	if ((t1 > 0.0f) && (t0 < t1))
+	{
+		return RaycastResult(ray, t0, t1, 1.0f / sampleFrequency);
+	}
 
-	if ((tmin > tymax) || (tymin > tmax))
-		return RaycastResult::nohit();
-
-	if (tymin > tmin)
-		tmin = tymin;
-
-	if (tymax < tmax)
-		tmax = tymax;
-
-	//Compute intersection point with z planes
-	float tzmin = (box.min.z() - ray.origin.z()) / ray.dir.z();
-	float tzmax = (box.max.z() - ray.origin.z()) / ray.dir.z();
-
-	//Ensure tzmax > tzmin
-	if (tzmin > tzmax) swap(tzmin, tzmax);
-
-	if ((tmin > tzmax) || (tzmin > tmax))
-		return RaycastResult::nohit();
-
-	if (tzmin > tmin)
-		tmin = tzmin;
-
-	if (tzmax < tmax)
-		tmax = tzmax;
-
-	//Clamp intersection distances along ray
-	//tmin/tmax might be less than zero if the ray origin is inside the AABB
-	tmin = std::max(0.0f, tmin);
-	tmax = std::max(0.0f, tmax);
-
-	return RaycastResult(ray, tmin, tmax, 1.0f / sampleFrequency);
+	return RaycastResult::nohit();
 }
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

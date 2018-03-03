@@ -25,17 +25,17 @@ void main()
 	
 	//intersection vectors with planes
 	vec3 tmin = (bmin - origin.xyz) * invDir;
-    vec3 tmax = (bmax - origin.xyz) * invDir;
+	vec3 tmax = (bmax - origin.xyz) * invDir;
     
-    vec3 tnear = min(tmin, tmax);
-    vec3 tfar =  max(tmin, tmax);
+	vec3 tnear = min(tmin, tmax);
+	vec3 tfar =  max(tmin, tmax);
     
 	//entry point
-    float t0 = max(max(tnear.x, 0.0f), max(tnear.y, tnear.z));
+	float t0 = max(max(tnear.x, 0.0f), max(tnear.y, tnear.z));
 	//exit point
-    float t1 = min(tfar.x, min(tfar.y, tfar.z));
+	float t1 = min(tfar.x, min(tfar.y, tfar.z));
     
-    bool intersects = (t1 > 0.0f) && (t0 < t1);
+	bool intersects = (t1 > 0.0f) && (t0 < t1);
 	
 	/*
 		Trace between intersection points

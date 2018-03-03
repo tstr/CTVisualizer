@@ -108,7 +108,7 @@ public:
 	using iterator = RayIterator;
 
 	/*
-		Construct ray-cast result structure from a ray, two intersection points and a step
+		Construct ray-cast result structure from a ray, two intersection points and a step size
 	*/
 	RaycastResult(const Ray& ray, float startD, float endD, float step) :
 		m_ray(ray),

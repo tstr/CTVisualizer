@@ -26,8 +26,7 @@ private:
 
 	void mousePressEvent(QMouseEvent* e) override;
 	void mouseMoveEvent(QMouseEvent* e) override;
-	void mouseReleaseEvent(QMouseEvent* e) override;
-	void timerEvent(QTimerEvent* e) override;
+	void wheelEvent(QWheelEvent * event) override;
 
 	void initializeGL() override;
 	void resizeGL(int w, int h) override;
@@ -44,6 +43,7 @@ private:
 	//Uniforms
 	QMatrix4x4 m_modelView;
 	float m_aspectRatio;
+	float m_distance;
 
 	QVector3D m_curPoint;
 	//Debug strings

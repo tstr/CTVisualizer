@@ -86,9 +86,9 @@ public:
 
 	static Volume::ElementType sample(const Volume& volume, const UVW& coords)
 	{
-		const auto x = (Volume::IndexType)(coords.u * volume.sizeX());
-		const auto y = (Volume::IndexType)(coords.v * volume.sizeY());
-		const auto z = (Volume::IndexType)(coords.w * volume.sizeZ());
+		const auto x = (Volume::IndexType)round(coords.u * volume.sizeX());
+		const auto y = (Volume::IndexType)round(coords.v * volume.sizeY());
+		const auto z = (Volume::IndexType)round(coords.w * volume.sizeZ());
 
 		const auto minval = std::numeric_limits<Volume::ElementType>::min();
 
@@ -105,8 +105,8 @@ public:
 
 	static Volume::ElementType sample(const VolumeSubimage& view, const UV& coords)
 	{
-		const auto x = (Volume::IndexType)(coords.u * view.width());
-		const auto y = (Volume::IndexType)(coords.v * view.height());
+		const auto x = (Volume::IndexType)round(coords.u * view.width());
+		const auto y = (Volume::IndexType)round(coords.v * view.height());
 
 		const auto minval = std::numeric_limits<Volume::ElementType>::min();
 

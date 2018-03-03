@@ -4,6 +4,7 @@
 
 #include "CameraView.h"
 
+#include <QtMath>
 #include <QMouseEvent>
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -88,8 +89,7 @@ void CameraView::mouseMoveEvent(QMouseEvent* event)
 		QVector3D p1 = mapToSphere(event->localPos());
 
 		//Compute angle between p0 and p1
-		float angle = acosf(QVector3D::dotProduct(p1, p0));
-		angle *= (180.0f / 3.14159f);
+		float angle = qRadiansToDegrees(acosf(QVector3D::dotProduct(p1, p0)));
 
 		//Compute axis of rotation between p0 and p1
 		QVector3D axis = QVector3D::crossProduct(p1, p0);

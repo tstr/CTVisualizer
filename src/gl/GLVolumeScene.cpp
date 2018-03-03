@@ -124,6 +124,7 @@ void GLVolumeScene::initializeGL()
 	}
 
 	m_aspectRatio = 1.0f;
+	m_distance = 4.0f;
 	m_modelView.rotate(90, 1, 0, 0);
 
 	// Format info strings
@@ -153,7 +154,7 @@ void GLVolumeScene::paintGL()
 	m_program->setUniformValue("modelView", m_modelView);
 	m_program->setUniformValue("aspectRatio", m_aspectRatio);
 	m_program->setUniformValue("fov", qDegreesToRadians(60.0f));
-	m_program->setUniformValue("distance", 4.0f);
+	m_program->setUniformValue("distance", m_distance);
 
 	//draw quad
 	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
@@ -224,15 +225,14 @@ void GLVolumeScene::mouseMoveEvent(QMouseEvent* e)
 	}
 }
 
-
-void GLVolumeScene::mouseReleaseEvent(QMouseEvent* e)
+void GLVolumeScene::wheelEvent(QWheelEvent* e)
 {
+	float numDegrees = (float)e->delta() / 8;
+	float numSteps = numDegrees / 15;
 
-}
+	m_distance = std::max(std::min(m_distance - (numSteps / 2), 10.0f), 1.0f);
 
-void GLVolumeScene::timerEvent(QTimerEvent* e)
-{
-	qDebug() << e;
+	update();
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
