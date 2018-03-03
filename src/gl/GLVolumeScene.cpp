@@ -2,6 +2,7 @@
 	Volume scene
 */
 
+#include <QtMath>
 #include <QFile>
 #include <QPainter>
 #include <QMouseEvent>
@@ -122,7 +123,8 @@ void GLVolumeScene::initializeGL()
 		return;
 	}
 
-	m_view.rotate(90, 1, 0, 0);
+	m_aspectRatio = 1.0f;
+	m_modelView.rotate(90, 1, 0, 0);
 
 	// Format info strings
 	m_metaStrings += QStringLiteral("GL_VENDOR: ")                   + (const char*)glGetString(GL_VENDOR);
@@ -135,7 +137,7 @@ void GLVolumeScene::resizeGL(int w, int h)
 {
 	glViewport(0, 0, w, h);
 
-	//m_proj.ortho(0, w, 0, h, 0.01f, 4.0f);
+	m_aspectRatio = (float)w / h;
 }
 
 void GLVolumeScene::paintGL()
@@ -146,11 +148,12 @@ void GLVolumeScene::paintGL()
 
 	glBindTexture(GL_TEXTURE_2D, m_tex);
 	glActiveTexture(GL_TEXTURE0);
-	
+
 	m_program->setUniformValue("volume", 0);
-	m_program->setUniformValue("model", m_model);
-	m_program->setUniformValue("view", m_view);
-	m_program->setUniformValue("proj", m_proj);
+	m_program->setUniformValue("modelView", m_modelView);
+	m_program->setUniformValue("aspectRatio", m_aspectRatio);
+	m_program->setUniformValue("fov", qDegreesToRadians(60.0f));
+	m_program->setUniformValue("distance", 4.0f);
 
 	//draw quad
 	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
@@ -207,13 +210,12 @@ void GLVolumeScene::mouseMoveEvent(QMouseEvent* e)
 		QVector3D p1 = mapToSphere(width(), height(), e->localPos());
 
 		//Compute angle between p0 and p1
-		float angle = acosf(QVector3D::dotProduct(p1, p0));
-		angle *= (180.0f / 3.14159f);
+		float angle = qRadiansToDegrees(acosf(QVector3D::dotProduct(p1, p0)));
 
 		//Compute axis of rotation between p0 and p1
 		QVector3D axis = QVector3D::crossProduct(p1, p0);
 
-		m_view.rotate(angle, axis);
+		m_modelView.rotate(angle, axis);
 
 		//Update current point
 		m_curPoint = p1;

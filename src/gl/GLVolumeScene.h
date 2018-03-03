@@ -8,7 +8,6 @@
 #include <QOpenGLWidget>
 #include <QOpenGLFunctions_4_2_Core>
 #include <QOpenGLShaderProgram>
-#include <QOpenGLTexture>
 
 #include "gfx/Volume.h"
 
@@ -42,13 +41,12 @@ private:
 	//volume texture
 	GLuint m_tex;
 
-	//Matrices
-	QMatrix4x4 m_model;
-	QMatrix4x4 m_view;
-	QMatrix4x4 m_proj;
+	//Uniforms
+	QMatrix4x4 m_modelView;
+	float m_aspectRatio;
 
 	QVector3D m_curPoint;
-
+	//Debug strings
 	QStringList m_metaStrings;
 
 	const Volume* m_volume;

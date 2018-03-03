@@ -4,13 +4,13 @@
 
 #version 330 core
 
-uniform mat4 model;
-uniform mat4 view;
-uniform mat4 proj;
+uniform mat4 modelView;
+uniform float aspectRatio;
+uniform float fov;
+uniform float distance;
 
-//ray position/direction
-out vec4 rorg;
-out vec3 rdir;
+out vec4 origin;
+out vec3 dir;
 
 void main()
 {
@@ -21,29 +21,26 @@ void main()
 		vec2(-1.0, 1.0),
 		vec2(1.0, 1.0)
 	);
-
-	//center of rotation
-	const vec4 center = vec4(0.5, 0.5, 0.5, 0);
+	
+	/*
+		Using the pinhole camera model,
+		apply a perspective transform.
+	*/
+	
+	//Distance from eye to image plane
+	float focalLength = 1.0f / tan(fov / 2);
 	
 	//Ray origin
-	rorg = vec4((quad[gl_VertexID] + 1.0) / 2.0, 0.0, 1.0);
-	rorg.y = 1.0f - rorg.y; //flip y component
-
+	origin = vec4(0,0,distance,1);		 //eye position
+	origin = modelView * origin;
+	origin = (origin + 1) * 0.5; //translate to 0-1 range
+	
 	//Ray direction
-	rdir = vec3(0, 0, 1);
-
-	//Transform ray origin
-	rorg -= center;
-	rorg = model * rorg;
-	rorg = view  * rorg;
-	rorg = proj  * rorg;
-	rorg += center;
-
-	//Transform ray direction
-	rdir = mat3(model) * rdir;
-	rdir = mat3(view)  * rdir;
-	rdir = mat3(proj)  * rdir;
-	rdir = normalize(rdir);
-
+	dir = vec3(quad[gl_VertexID], -focalLength);
+	dir.x *= aspectRatio;		 //scale width by aspect ratio
+	dir.y = -dir.y;				 //flip y direction
+	dir = mat3(modelView) * dir;
+	dir = normalize(dir);
+	
     gl_Position = vec4(quad[gl_VertexID], 0.0, 1.0);
 }
