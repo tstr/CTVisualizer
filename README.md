@@ -1,6 +1,9 @@
 ## CT Viewer
 This is a University Computer Graphics assignment for viewing 3D volume data.
 
+[](res/view1.png)
+[](res/view2.png)
+
 ## Dependencies
 * The Qt5 SDK (version 5.8) (https://www.qt.io/download)
 * CThead dataset (http://graphics.stanford.edu/data/voldata/)
