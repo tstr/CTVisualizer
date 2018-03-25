@@ -1,4 +1,4 @@
-## CT Viewer
+## CT Visualiser
 This is a University Computer Graphics assignment for viewing 3D volume data.
 
 ![](res/view1.png)
